@@ -1,9 +1,98 @@
 "use client"
 import { useState } from 'react';
 import ImageDisplay from './ImageDisplay';
+import { ImageResolutions } from '@/types/imageResolution';
+import { toast } from 'sonner';
+import { SignInButton, SignUpButton, useUser } from '@clerk/nextjs';
+import { useGenerationStatus } from '@/hooks/useGenerationStatus';
 
 const Hero = () => {
   const [prompt, setPrompt] = useState('');
+  const [generationId, setGenerationId] = useState<string>();
+  const { user, isLoaded } = useUser();
+  const [currentimageUrl,setImageUrl] = useState<string>();  
+  
+
+  console.log('Hero render - generationId:', generationId);
+
+  // Ensure state updates are triggering re-renders
+
+  const { status, imageUrl, isLoading } = useGenerationStatus({
+    generationId,
+    onComplete: (url) => {
+      console.log('Generation complete with URL:', url);
+      setImageUrl(url);
+      // Don't clear generationId here, let it persist
+    },
+    onError: () => {
+      console.log('Generation error');
+      setGenerationId(undefined); // Only clear on error
+    }
+  });
+
+  console.log('Hook returned - status:', status, 'isLoading:', isLoading, 'imageUrl:', imageUrl);
+
+  const handleGenerate = async () => {
+    console.log('handleGenerate called');
+    if (!prompt.trim()) {
+      toast.error('Please enter a prompt');
+      return;
+    }
+    
+    try {
+      const resolution = ImageResolutions.getResolution('portrait');
+      console.log('Sending request with resolution:', resolution);
+      
+      const requestBody = {
+        prompt: prompt.trim(),
+        settings: {
+          height: resolution.height,
+          width: resolution.width,
+          prompt: 1.0
+        }
+      };
+      console.log('Request body:', requestBody);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
+      });
+
+      console.log('Raw response:', response);
+      const data = await response.json();
+      console.log('Upload response data:', data);
+
+      if (!response.ok) {
+        console.error('Response not OK:', response.status, response.statusText);
+        if (response.status === 403) {
+          toast.error(`${data.error}. Points remaining: ${data.pointsBalance}`);
+        } else {
+          toast.error(data.error || 'Failed to generate image');
+        }
+        return;
+      }
+
+      toast.success('Generation started! Your image will be ready soon.');
+      setPrompt(''); // Clear prompt after successful submission
+      
+      if (data.generationId) {
+        console.log('Setting generationId:', data.generationId);
+        // Force state update
+        setGenerationId(prev => {
+          console.log('Previous generationId:', prev);
+          return data.generationId;
+        });
+      } else {
+        console.error('No generationId in response:', data);
+      }
+    } catch (error) {
+      console.error('Error in handleGenerate:', error);
+      toast.error('Failed to generate image');
+    }
+  };
 
   return (
     <section className="w-full flex flex-col items-center justify-center pt-24 px-4">
@@ -14,7 +103,11 @@ const Hero = () => {
 
       {/* Subheading */}
       <h2 className="text-lg md:text-[20px] mt-8 text-center font-bold">
-        Type in what you imagine, no login required
+        {user ? (
+          <>Welcome back! You have unlimited generations.</>
+        ) : (
+          <>Type in what you imagine, sign up for unlimited generations</>
+        )}
       </h2>
 
       {/* Input Container */}
@@ -31,18 +124,43 @@ const Hero = () => {
               onChange={(e) => setPrompt(e.target.value)}
               placeholder="Japanese model"
               className="w-full px-6 py-4 text-lg outline-none rounded-l-lg"
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' && !isLoading) {
+                  handleGenerate();
+                }
+              }}
             />
             <button 
-              className="bg-[#FFA41D] text-white px-10 py-4 rounded-xl hover:bg-opacity-90 transition-colors font-medium m-2"
+              onClick={handleGenerate}
+              disabled={isLoading || !prompt.trim()}
+              className={`${
+                isLoading ? 'bg-opacity-70 cursor-not-allowed' : 'hover:bg-opacity-90'
+              } bg-[#FFA41D] text-white px-10 py-4 rounded-xl transition-colors font-medium m-2`}
             >
-              Generate
+              {isLoading ? 'Generating...' : 'Generate'}
             </button>
           </div>
         </div>
       </div>
 
+      {/* Sign Up/Sign In Buttons */}
+      {!user && isLoaded && (
+        <div className="mt-8 flex gap-4">
+          <SignUpButton mode="modal">
+            <button className="bg-[#FFA41D] text-white px-6 py-2 rounded-lg hover:bg-opacity-90 transition-colors font-medium">
+              Sign Up
+            </button>
+          </SignUpButton>
+          <SignInButton mode="modal">
+            <button className="border border-[#FFA41D] text-[#FFA41D] px-6 py-2 rounded-lg hover:bg-[#FFA41D] hover:text-white transition-colors font-medium">
+              Sign In
+            </button>
+          </SignInButton>
+        </div>
+      )}
+
       {/* Image Display with Action Buttons */}
-      <ImageDisplay />
+      <ImageDisplay imageUrl={currentimageUrl} isLoading={isLoading} />
     </section>
   );
 };

@@ -2,9 +2,11 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Drawer from './Drawer';
+import { SignInButton, SignUpButton, UserButton, useUser } from '@clerk/nextjs';
 
 const Header = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const { isSignedIn } = useUser();
 
   return (
     <header className="w-full bg-white shadow-[0_4px_20px_rgba(0,0,0,0.15)] fixed top-0 z-40">
@@ -28,18 +30,22 @@ const Header = () => {
             >
               Pricing
             </Link>
-            <Link 
-              href="/login" 
-              className="text-black hover:text-[#DE3C4B] transition-colors flex items-center text-2xl"
-            >
-              Login
-            </Link>
-            <Link 
-              href="/upgrade" 
-              className="bg-[#FFA41D] text-white p-10 h-[1.5vh] flex items-center justify-center text-2xl rounded-xl hover:bg-opacity-90 transition-colors min-w-[150px]"
-            >
-              Upgrade
-            </Link>
+            {isSignedIn ? (
+              <UserButton />
+            ) : (
+              <>
+                <SignInButton mode="modal">
+                  <button className="text-black hover:text-[#DE3C4B] transition-colors flex items-center text-2xl">
+                    Login
+                  </button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <button className="bg-[#FFA41D] text-white p-10 h-[1.5vh] flex items-center justify-center text-2xl rounded-xl hover:bg-opacity-90 transition-colors min-w-[150px]">
+                    Sign Up
+                  </button>
+                </SignUpButton>
+              </>
+            )}
           </div>
 
           {/* Mobile Menu Button */}
