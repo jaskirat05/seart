@@ -5,9 +5,10 @@ import Link from 'next/link';
 interface DrawerProps {
   isOpen: boolean;
   onClose: () => void;
+  children: React.ReactNode;
 }
 
-const Drawer = ({ isOpen, onClose }: DrawerProps) => {
+const Drawer = ({ isOpen, onClose, children }: DrawerProps) => {
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === 'Escape') {
@@ -49,27 +50,7 @@ const Drawer = ({ isOpen, onClose }: DrawerProps) => {
           </div>
           
           <nav className="flex flex-col items-center pt-8 space-y-8">
-            <Link 
-              href="/pricing" 
-              className="text-black hover:text-[#DE3C4B] transition-colors text-xl font-medium"
-              onClick={onClose}
-            >
-              Pricing
-            </Link>
-            <Link 
-              href="/login" 
-              className="text-black hover:text-[#DE3C4B] transition-colors text-xl font-medium"
-              onClick={onClose}
-            >
-              Login
-            </Link>
-            <Link 
-              href="/upgrade" 
-              className="bg-[#FFA41D] text-white px-8 py-3 rounded-xl hover:bg-opacity-90 transition-colors text-xl font-medium text-center"
-              onClick={onClose}
-            >
-              Upgrade
-            </Link>
+            {children}
           </nav>
         </div>
       </div>

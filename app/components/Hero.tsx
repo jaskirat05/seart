@@ -3,7 +3,7 @@ import { useState } from 'react';
 import ImageDisplay from './ImageDisplay';
 import { ImageResolutions } from '@/types/imageResolution';
 import { toast } from 'sonner';
-import { SignInButton, SignUpButton, useUser } from '@clerk/nextjs';
+import { useUser } from '@clerk/nextjs';
 import { useGenerationStatus } from '@/hooks/useGenerationStatus';
 
 const Hero = () => {
@@ -11,11 +11,22 @@ const Hero = () => {
   const [generationId, setGenerationId] = useState<string>();
   const { user, isLoaded } = useUser();
   const [currentimageUrl,setImageUrl] = useState<string>();  
+  const [seed, setSeed] = useState(0);  
   
 
   console.log('Hero render - generationId:', generationId);
 
   // Ensure state updates are triggering re-renders
+   // Function to generate a random seed
+   const generateSeed = () => {
+    // Generate a random number between 1 and 2^32 - 1 (max positive 32-bit integer)
+    const seed=Math.floor(Math.random() * 2147483647) + 1;
+    setSeed(seed);
+    //return seed;
+
+  };
+
+
 
   const { status, imageUrl, isLoading } = useGenerationStatus({
     generationId,
@@ -143,24 +154,8 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Sign Up/Sign In Buttons */}
-      {!user && isLoaded && (
-        <div className="mt-8 flex gap-4">
-          <SignUpButton mode="modal">
-            <button className="bg-[#FFA41D] text-white px-6 py-2 rounded-lg hover:bg-opacity-90 transition-colors font-medium">
-              Sign Up
-            </button>
-          </SignUpButton>
-          <SignInButton mode="modal">
-            <button className="border border-[#FFA41D] text-[#FFA41D] px-6 py-2 rounded-lg hover:bg-[#FFA41D] hover:text-white transition-colors font-medium">
-              Sign In
-            </button>
-          </SignInButton>
-        </div>
-      )}
-
       {/* Image Display with Action Buttons */}
-      <ImageDisplay imageUrl={currentimageUrl} isLoading={isLoading} />
+      <ImageDisplay imageUrl={currentimageUrl} isLoading={isLoading} seed= {seed} onRefresh={generateSeed} />
     </section>
   );
 };

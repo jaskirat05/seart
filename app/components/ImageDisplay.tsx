@@ -4,9 +4,11 @@ import { motion } from 'framer-motion';
 interface ImageDisplayProps {
   imageUrl?: string;
   isLoading: boolean;
+  seed?: number;
+  onRefresh?: () => void;
 }
 
-const ImageDisplay = ({ imageUrl, isLoading }: ImageDisplayProps) => {
+const ImageDisplay = ({ imageUrl, isLoading, seed, onRefresh }: ImageDisplayProps) => {
   return (
     <div className="flex flex-col items-center mt-12">
       {/* Image Container with 3D effect and skeleton loading */}
@@ -50,17 +52,23 @@ const ImageDisplay = ({ imageUrl, isLoading }: ImageDisplayProps) => {
 
       {/* Action Buttons */}
       <div className="flex gap-20 mt-6">
-        {/* Refresh Button */}
-        <motion.button 
-          className="flex flex-col items-center group"
-          whileHover={{ scale: 1.1 }}
-          whileTap={{ scale: 0.9 }}
-        >
-          <span className="material-symbols-outlined text-4xl opacity-50 text-[#DE3C4B] mb-2 group-hover:opacity-100 transition-opacity">
-            refresh
+        {/* Refresh Button and Seed */}
+        <div className="flex flex-col items-center">
+          <motion.button 
+            className="flex flex-col items-center group"
+            whileHover={{ scale: 1.1 }}
+            whileTap={{ scale: 0.9 }}
+            onClick={onRefresh}
+          >
+            <span className="material-symbols-outlined text-4xl opacity-50 text-[#DE3C4B] mb-1 group-hover:opacity-100 transition-opacity">
+              refresh
+            </span>
+            <span className="text-[#666464] text-sm">Refresh</span>
+          </motion.button>
+          <span className="text-xs text-gray-500 mt-2">
+            {seed ? `Seed: ${seed}` : 'Generate to see seed'}
           </span>
-          <span className="text-[#666464] text-sm">Refresh</span>
-        </motion.button>
+        </div>
 
         {/* Download Button */}
         <motion.button 

@@ -4,6 +4,7 @@ import { Montserrat } from 'next/font/google'
 import { Metadata } from 'next'
 import { Toaster } from 'sonner';
 import { ClerkProvider } from '@clerk/nextjs';
+import HeaderWrapper from './components/HeaderWrapper';
 
 const montserrat = Montserrat({ 
   subsets: ['latin'],
@@ -32,7 +33,7 @@ export default function RootLayout({
           />
         </head>
         <body className={montserrat.className}>
-          <Header />
+        <HeaderWrapper />
           <main className="pt-[155px]">
             {children}
           </main>
