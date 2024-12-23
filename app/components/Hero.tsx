@@ -60,7 +60,8 @@ const Hero = () => {
           height: resolution.height,
           width: resolution.width,
           prompt: prompt.trim(),
-          seed:seed
+          seed:seed,
+          nImages:1
         }
       };
       console.log('Request body:', requestBody);
