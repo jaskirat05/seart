@@ -2,15 +2,54 @@
 import { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import Header from '../components/Header';
+import { useImageGeneration} from '@/hooks/useImageGeneration';  
+import { useGenerationStatus } from '@/hooks/useGenerationStatus';  
+import { ImageResolution, ImageResolutions } from '@/types/imageResolution';
 
 const Settings = () => {
   const { user } = useUser();
   const [model, setModel] = useState('1.1');
   const [prompt, setPrompt] = useState('');
+ const [imgResolution,setResolution]=useState<ImageResolution>(ImageResolutions.PORTRAIT);
+  const [seed, setSeed] = useState(0);  
+
+  const [noOfImages, setNoOfImages] = useState(1);
+  const [generationId, setGenerationId] = useState<string>();
+
+  const { generate, isLoading } = useImageGeneration();
+  const { status, imageUrl } = useGenerationStatus({
+    generationId,
+    onComplete: (url) => {
+      console.log('Generation complete:', url);
+    },
+    onError: () => {
+      setGenerationId(undefined);
+    }
+  });
+  const handleResolutionChange = (resolution: ImageResolution) => {  
+    setResolution(resolution);  
+  }
+  const handleGenerate = async () => {
+    const newGenerationId = await generate({
+      prompt,
+      settings: {
+        height:imgResolution.height,
+        width:imgResolution.width,
+        seed:seed,
+        model:model,
+        nImages:noOfImages 
+      }
+    });
+    
+    if (newGenerationId) {
+      setGenerationId(newGenerationId);
+    }
+  
+  };
 
   return (
     <div className="min-h-screen bg-white">
-      <Header />
+     
       
       {/* Main Content */}
       <main className="pt-[60px] px-4 sm:px-8 md:px-16 lg:px-[120px]">
@@ -35,15 +74,15 @@ const Settings = () => {
               <div className="mb-6">
                 <h3 className="text-base font-medium text-gray-700">Image Settings</h3>
                 <div className="mt-2 grid grid-cols-3 gap-2">
-                  <button className="aspect-square border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FFA41D] relative group">
+                  <button className="aspect-square border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FFA41D] relative group" onClick={() => handleResolutionChange(ImageResolutions.SQUARE)} >
                     <div className="absolute inset-2 bg-gray-100 rounded group-hover:bg-gray-200 transition-colors"></div>
                     <span className="absolute inset-0 flex items-center justify-center text-sm font-medium text-gray-700">1:1</span>
                   </button>
-                  <button className="aspect-[9/5] border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FFA41D] relative group">
+                  <button className="aspect-[9/5] border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FFA41D] relative group  " onClick={() => handleResolutionChange(ImageResolutions.LANDSCAPE)} >
                     <div className="absolute inset-2 bg-gray-100 rounded group-hover:bg-gray-200 transition-colors"></div>
                     <span className="absolute inset-0 flex items-center justify-center text-sm font-medium text-gray-700">9:5</span>
                   </button>
-                  <button className="aspect-[9/16] border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FFA41D] relative group">
+                  <button className="aspect-[9/16] border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FFA41D] relative group " onClick={() => handleResolutionChange(ImageResolutions.PORTRAIT)} >
                     <div className="absolute inset-2 bg-gray-100 rounded group-hover:bg-gray-200 transition-colors"></div>
                     <span className="absolute inset-0 flex items-center justify-center text-sm font-medium text-gray-700">9:16</span>
                   </button>
@@ -57,6 +96,7 @@ const Settings = () => {
                   {[1, 2, 3, 4].map((num) => (
                     <button
                       key={num}
+                      onClick={()=>setNoOfImages(num)} 
                       className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FFA41D]"
                     >
                       {num}
@@ -99,37 +139,47 @@ const Settings = () => {
                   className="w-full px-6 py-4 text-lg outline-none rounded-l-lg"
                 />
                 <button 
-                  className="bg-[#FFA41D] text-white px-10 py-4 rounded-xl transition-colors font-medium m-2 hover:bg-opacity-90"
+                  onClick={handleGenerate}
+                  disabled={isLoading}
+                  className="bg-[#FFA41D] text-white px-10 py-4 rounded-xl transition-colors font-medium m-2 hover:bg-opacity-90 disabled:bg-opacity-50 disabled:cursor-not-allowed"
                 >
-                  Generate
+                  {isLoading ? 'Generating...' : 'Generate'}
                 </button>
               </div>
             </div>
 
             {/* Generations Display Area */}
             <div className="mt-6 bg-white rounded-xl p-6 shadow-sm min-h-[400px]">
-              {/* Single Row of Image Placeholders */}
-              <div className="flex gap-4 h-full">
-                {[1, 2, 3, 4].map((_, i) => (
-                  <div 
-                    key={i} 
-                    className="flex-1 aspect-square bg-gray-50 rounded-lg flex items-center justify-center relative overflow-hidden"
-                  >
-                    <span className="material-symbols-outlined text-gray-200" style={{ fontSize: '120px' }}>
-                      animated_images
-                    </span>
-                    {/* Skeleton Animation (hidden by default, shown when loading) */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-200 animate-shimmer hidden">
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent" 
-                           style={{ 
-                             backgroundSize: '200% 100%',
-                             animation: 'shimmer 2s infinite linear'
-                           }}
-                      ></div>
+              {/* Show generated image if available */}
+              {imageUrl ? (
+                <div className="flex justify-center">
+                  <img src={imageUrl} alt="Generated" className="max-w-full rounded-lg" />
+                </div>
+              ) : (
+                /* Single Row of Image Placeholders */
+                <div className="flex gap-4 h-full">
+                  {[1, 2, 3, 4].map((_, i) => (
+                    <div 
+                      key={i} 
+                      className="flex-1 aspect-square bg-gray-50 rounded-lg flex items-center justify-center relative overflow-hidden"
+                      
+                    >
+                      <span className="material-symbols-outlined text-gray-200" style={{ fontSize: '120px' }}>
+                        animated_images
+                      </span>
+                      {/* Skeleton Animation (shown when loading) */}
+                      <div className={`absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-200 animate-shimmer ${isLoading ? '' : 'hidden'}`}>
+                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent" 
+                             style={{ 
+                               backgroundSize: '200% 100%',
+                               animation: 'shimmer 2s infinite linear'
+                             }}
+                        ></div>
+                      </div>
                     </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>

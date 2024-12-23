@@ -22,6 +22,10 @@ async function imageAdapter(prompt: string, settings: ModelSettings) {
   // Update the dimensions in node 6 of the workflow
   jsonData.input.workflow[6].inputs.width = settings.width;
   jsonData.input.workflow[6].inputs.height = settings.height;
+  if (settings.seed) {
+    jsonData.input.workflow[1].inputs.seed = settings.seed;
+  }
+
 
   // Update the prompt in node 4 by replacing the placeholder
   const promptWithQuality = `${prompt}, highly detailed, high quality`;
@@ -30,12 +34,14 @@ async function imageAdapter(prompt: string, settings: ModelSettings) {
   // Update webhook URL based on environment
   const webhookUrl = getWebhookUrl();
   jsonData.webhook = webhookUrl;
+  jsonData.input.workflow["6"].inputs.batch_size = settings.nImages;
   
   const workflowStr = JSON.stringify(jsonData);
   console.log('Workflow configuration:', {
     prompt: promptWithQuality,
     dimensions: { width: settings.width, height: settings.height },
-    webhookUrl
+    webhookUrl,
+   
   });
   
   const response = await fetch('https://api.runpod.ai/v2/4qkezhk11xokyl/run', {

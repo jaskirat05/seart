@@ -17,16 +17,14 @@ export default clerkMiddleware(async (auth, req) => {
     const response = NextResponse.next();
    
     // For authenticated users, add user ID
-    if (userId) {
-        response.headers.set('x-user-id', userId);
-        return response;
-    }
-
+    
     // For anonymous users on public routes that need session
     if (!userId && (req.nextUrl.pathname.startsWith('/api/upload') || 
                    req.nextUrl.pathname.startsWith('/api/generations')) || (req.nextUrl.pathname.startsWith('/'))) {
         const cookieStore = await cookies();
-       
+      if (!cookieStore.has('anon_session_id')) {
+
+        
         const ip = req.headers.get('x-real-ip') ?? 
                   req.headers.get('x-forwarded-for') ?? 
                   'unknown';
@@ -79,7 +77,14 @@ export default clerkMiddleware(async (auth, req) => {
                 { error: 'Failed to create session' },
                 { status: 500 }
             );
+        }}
+        else if (cookieStore.has('anon_session_id')) { 
+            const sessionCookie = cookieStore.get('anon_session_id')?.value;
+            response.headers.set('x-session-id', sessionCookie!);
+            console.log('Session ID present:', sessionCookie);
+            return response;  
         }
+
     }
 
     // For all other routes/cases

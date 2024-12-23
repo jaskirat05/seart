@@ -8,6 +8,8 @@ export interface ModelSettings {
   prompt?: number;
   width?: number;
   height?: number; 
+  seed?:number;
+  nImages:number;
   // Add other settings as needed
 }
 

@@ -59,7 +59,8 @@ const Hero = () => {
         settings: {
           height: resolution.height,
           width: resolution.width,
-          prompt: 1.0
+          prompt: prompt.trim(),
+          seed:seed
         }
       };
       console.log('Request body:', requestBody);
