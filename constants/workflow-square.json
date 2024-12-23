@@ -1,0 +1,101 @@
+{
+    "input": {
+      "workflow":{
+        "1": {
+          "inputs": {
+            "seed": 586272065682503,
+            "steps": 30,
+            "cfg": 7,
+            "sampler_name": "dpmpp_2m_sde_gpu",
+            "scheduler": "karras",
+            "denoise": 1,
+            "model": [
+              "2",
+              0
+            ],
+            "positive": [
+              "4",
+              0
+            ],
+            "negative": [
+              "3",
+              0
+            ],
+            "latent_image": [
+              "6",
+              0
+            ]
+          },
+          "class_type": "KSampler"
+        },
+        "2": {
+          "inputs": {
+            "ckpt_name": "ponyRealism_V22MainVAE.safetensors"
+          },
+          "class_type": "CheckpointLoaderSimple"
+        },
+        "3": {
+          "inputs": {
+            "text": "",
+            "clip": [
+              "11",
+              0
+            ]
+          },
+          "class_type": "CLIPTextEncode"
+        },
+        "4": {
+          "inputs": {
+            "text": "score_9, score_8_up, score_7_up, face close up, alternative girl, watching over black sunglasses, jacket, necklace, neon light reflections on skin, ear ring, makeup, skin imperfection, short hair, beanie, neon lights background, low light, depth of field, highly detailed, high contrast, film grain, Rim Lighting, Long Exposure, DSLR",
+            "clip": [
+              "2",
+              1
+            ]
+          },
+          "class_type": "CLIPTextEncode"
+        },
+        "6": {
+          "inputs": {
+            "width": 512,
+            "height": 512,
+            "batch_size": 1
+          },
+          "class_type": "EmptyLatentImage"
+        },
+        "8": {
+          "inputs": {
+            "samples": [
+              "1",
+              0
+            ],
+            "vae": [
+              "2",
+              2
+            ]
+          },
+          "class_type": "VAEDecode"
+        },
+        "10": {
+          "inputs": {
+            "filename_prefix": "ComfyUI",
+            "images": [
+              "8",
+              0
+            ]
+          },
+          "class_type": "SaveImage"
+        },
+        "11": {
+          "inputs": {
+            "stop_at_clip_layer": -2,
+            "clip": [
+              "2",
+              1
+            ]
+          },
+          "class_type": "CLIPSetLastLayer"
+        }
+      }
+    },
+   "webhook": "https://2bcc-110-235-233-146.ngrok-free.app/api/webhook"
+  }

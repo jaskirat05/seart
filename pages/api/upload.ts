@@ -1,4 +1,5 @@
 import workflowH from '../../constants/workflow-height.json';
+import ponyAdv from '../../constants/workflow-square.json'; 
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAuth } from '@clerk/nextjs/server';
 import { supabaseAdmin } from '@/utils/supabaseAdmin';
@@ -17,7 +18,7 @@ export const config = {
 }
 
 async function imageAdapter(prompt: string, settings: ModelSettings) {
-  const jsonData = JSON.parse(JSON.stringify(workflowH));
+  const jsonData = JSON.parse(JSON.stringify(ponyAdv));
   
   // Update the dimensions in node 6 of the workflow
   jsonData.input.workflow[6].inputs.width = settings.width;
@@ -43,8 +44,9 @@ async function imageAdapter(prompt: string, settings: ModelSettings) {
     webhookUrl,
    
   });
-  
-  const response = await fetch('https://api.runpod.ai/v2/4qkezhk11xokyl/run', {
+  const urlPonyAdvanced="https://api.runpod.ai/v2/f1idbra00j2itr/run"
+  const urlPony4Step='https://api.runpod.ai/v2/4qkezhk11xokyl/run'
+  const response = await fetch(urlPonyAdvanced , {
     method: 'POST',
     headers: {
       'Authorization': process.env.RUNPOD_API_KEY!,

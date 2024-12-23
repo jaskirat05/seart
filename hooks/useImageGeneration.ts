@@ -5,7 +5,7 @@ import { ModelSettings } from '@/types/database';
 
 interface GenerateImageOptions {
   prompt: string;
-  settings?: Partial<ModelSettings>;
+  settings?: Partial<ModelSettings>; 
   resolution?: 'portrait' | 'landscape' | 'square';
 }
 
@@ -36,6 +36,7 @@ export function useImageGeneration(): UseImageGenerationReturn {
         settings: {
           height: imageResolution.height,
           width: imageResolution.width,
+          prompt: prompt.trim(),
           ...settings
         }
       };

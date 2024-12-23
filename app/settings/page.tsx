@@ -53,9 +53,9 @@ const Settings = () => {
       
       {/* Main Content */}
       <main className="pt-[60px] px-4 sm:px-8 md:px-16 lg:px-[120px]">
-        <div className="flex gap-8 py-6">
+        <div className="flex flex-col-reverse lg:flex-row gap-8 py-6">
           {/* Left Sidebar - Settings */}
-          <div className="w-[400px] flex-shrink-0">
+          <div className="w-full lg:w-[400px] lg:flex-shrink-0">
             {/* Model Settings */}
             <div className="bg-white rounded-xl p-6 shadow-sm">
               {/* Model Version */}
