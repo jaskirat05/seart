@@ -8,7 +8,7 @@ import { ImageResolution, ImageResolutions } from '@/types/imageResolution';
 
 const Settings = () => {
   const { user } = useUser();
-  const [model, setModel] = useState('1.1');
+  const [model, setModel] = useState('flux');
   const [prompt, setPrompt] = useState('');
  const [imgResolution,setResolution]=useState<ImageResolution>(ImageResolutions.PORTRAIT);
   const [seed, setSeed] = useState(0);  
@@ -66,7 +66,8 @@ const Settings = () => {
                   onChange={(e) => setModel(e.target.value)}
                   className="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-[#FFA41D] focus:border-[#FFA41D] rounded-md"
                 >
-                  <option value="1.1">Flux 1.1</option>
+                  <option value="flux">Flux 1.1</option>
+                  <option value="pony">Pony Diffusion</option>
                 </select>
               </div>
 
@@ -74,16 +75,46 @@ const Settings = () => {
               <div className="mb-6">
                 <h3 className="text-base font-medium text-gray-700">Image Settings</h3>
                 <div className="mt-2 grid grid-cols-3 gap-2">
-                  <button className="aspect-square border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FFA41D] relative group" onClick={() => handleResolutionChange(ImageResolutions.SQUARE)} >
-                    <div className="absolute inset-2 bg-gray-100 rounded group-hover:bg-gray-200 transition-colors"></div>
+                  <button 
+                    className={`aspect-square border rounded-md hover:bg-gray-50 focus:outline-none relative group overflow-hidden
+                      ${imgResolution === ImageResolutions.SQUARE 
+                        ? 'border-[#FFA41D] shadow-[0_0_10px_rgba(255,164,29,0.3)]' 
+                        : 'border-gray-300'}`}
+                    onClick={() => handleResolutionChange(ImageResolutions.SQUARE)}
+                  >
+                    <div className={`absolute inset-2 rounded transition-colors
+                      ${imgResolution === ImageResolutions.SQUARE 
+                        ? 'bg-[#FFA41D]/10' 
+                        : 'bg-gray-100 group-hover:bg-gray-200'}`}
+                    ></div>
                     <span className="absolute inset-0 flex items-center justify-center text-sm font-medium text-gray-700">1:1</span>
                   </button>
-                  <button className="aspect-[9/5] border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FFA41D] relative group  " onClick={() => handleResolutionChange(ImageResolutions.LANDSCAPE)} >
-                    <div className="absolute inset-2 bg-gray-100 rounded group-hover:bg-gray-200 transition-colors"></div>
+                  <button 
+                    className={`aspect-[9/5] border rounded-md hover:bg-gray-50 focus:outline-none relative group overflow-hidden
+                      ${imgResolution === ImageResolutions.LANDSCAPE 
+                        ? 'border-[#FFA41D] shadow-[0_0_10px_rgba(255,164,29,0.3)]' 
+                        : 'border-gray-300'}`}
+                    onClick={() => handleResolutionChange(ImageResolutions.LANDSCAPE)}
+                  >
+                    <div className={`absolute inset-2 rounded transition-colors
+                      ${imgResolution === ImageResolutions.LANDSCAPE 
+                        ? 'bg-[#FFA41D]/10' 
+                        : 'bg-gray-100 group-hover:bg-gray-200'}`}
+                    ></div>
                     <span className="absolute inset-0 flex items-center justify-center text-sm font-medium text-gray-700">9:5</span>
                   </button>
-                  <button className="aspect-[9/16] border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FFA41D] relative group " onClick={() => handleResolutionChange(ImageResolutions.PORTRAIT)} >
-                    <div className="absolute inset-2 bg-gray-100 rounded group-hover:bg-gray-200 transition-colors"></div>
+                  <button 
+                    className={`aspect-[9/16] border rounded-md hover:bg-gray-50 focus:outline-none relative group overflow-hidden
+                      ${imgResolution === ImageResolutions.PORTRAIT 
+                        ? 'border-[#FFA41D] shadow-[0_0_10px_rgba(255,164,29,0.3)]' 
+                        : 'border-gray-300'}`}
+                    onClick={() => handleResolutionChange(ImageResolutions.PORTRAIT)}
+                  >
+                    <div className={`absolute inset-2 rounded transition-colors
+                      ${imgResolution === ImageResolutions.PORTRAIT 
+                        ? 'bg-[#FFA41D]/10' 
+                        : 'bg-gray-100 group-hover:bg-gray-200'}`}
+                    ></div>
                     <span className="absolute inset-0 flex items-center justify-center text-sm font-medium text-gray-700">9:16</span>
                   </button>
                 </div>
@@ -96,8 +127,11 @@ const Settings = () => {
                   {[1, 2, 3, 4].map((num) => (
                     <button
                       key={num}
-                      onClick={()=>setNoOfImages(num)} 
-                      className="flex items-center justify-center px-4 py-2 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#FFA41D]"
+                      onClick={() => setNoOfImages(num)}
+                      className={`flex items-center justify-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all
+                        ${noOfImages === num 
+                          ? 'border-[#FFA41D] shadow-[0_0_10px_rgba(255,164,29,0.3)] bg-[#FFA41D]/10' 
+                          : 'border-gray-300'}`}
                     >
                       {num}
                     </button>

@@ -24,23 +24,20 @@ const Header =  ({sessionId ,userId}:HeaderProps) => {
             <span className="material-symbols-outlined text-black">
               animated_images
             </span>
-            <span className="ml-2 text-lg font-bold text-black">
+            <span className="ml-2 text-lg font-bold text-black hidden md:inline">
               Hell&apos;s kitchen
             </span>
           </div>
 
-          {/* Points Display - Centered */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-3">
-            <div className="flex items-center">
-              <span className="material-symbols-outlined text-[#FFA41D] text-xs">
-                battery_charging_full
-              </span>
-              <span className="ml-1 text-xs font-medium text-black">{points}</span>
-            </div>
-            <button className="text-[#FFA41D] text-xs font-medium hover:text-opacity-80 transition-colors">
-              Upgrade
-            </button>
-          </div>
+          {/* Mobile Menu Button */}
+          <button 
+            onClick={() => setIsDrawerOpen(true)}
+            className="md:hidden text-black hover:text-gray-600 transition-colors"
+          >
+            <span className="material-symbols-outlined">
+              menu
+            </span>
+          </button>
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-8">
@@ -68,40 +65,50 @@ const Header =  ({sessionId ,userId}:HeaderProps) => {
             )}
           </div>
 
-          {/* Mobile Menu Button */}
-          <button
-            className="md:hidden text-black"
-            onClick={() => setIsDrawerOpen(true)}
-          >
-            <span className="material-symbols-outlined">menu</span>
-          </button>
+          {/* Mobile Drawer */}
+          <Drawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)}>
+            <div className="flex flex-col items-center space-y-6">
+              {/* Mobile Points Display */}
+              <div className="flex items-center gap-3">
+                <div className="flex items-center">
+                  <span className="material-symbols-outlined text-[#FFA41D]">
+                    battery_charging_full
+                  </span>
+                  <span className="ml-1 font-medium text-black">{points}</span>
+                </div>
+                <button className="text-[#FFA41D] font-medium hover:text-opacity-80 transition-colors">
+                  Upgrade
+                </button>
+              </div>
+              
+              <Link 
+                href="/pricing" 
+                className="text-black hover:text-[#DE3C4B] transition-colors text-lg"
+                onClick={() => setIsDrawerOpen(false)}
+              >
+                Pricing
+              </Link>
+              
+              {!isSignedIn ? (
+                <>
+                  <SignInButton>
+                    <button className="text-black hover:text-[#DE3C4B] transition-colors text-lg">
+                      Login
+                    </button>
+                  </SignInButton>
+                  <SignUpButton>
+                    <button className="bg-[#FFA41D] text-white px-6 py-2 rounded-xl hover:bg-opacity-90 transition-colors text-lg">
+                      Sign Up
+                    </button>
+                  </SignUpButton>
+                </>
+              ) : (
+                <UserButton afterSignOutUrl="/" />
+              )}
+            </div>
+          </Drawer>
         </div>
       </div>
-
-      {/* Mobile Drawer */}
-      <Drawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)}>
-        <div className="flex flex-col space-y-4">
-          <Link href="/pricing" className="text-black hover:text-[#DE3C4B] transition-colors">
-            Pricing
-          </Link>
-          {isSignedIn ? (
-            <UserButton />
-          ) : (
-            <>
-              <SignInButton mode="modal">
-                <button className="text-black hover:text-[#DE3C4B] transition-colors">
-                  Login
-                </button>
-              </SignInButton>
-              <SignUpButton mode="modal">
-                <button className="bg-[#FFA41D] text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors">
-                  Sign Up
-                </button>
-              </SignUpButton>
-            </>
-          )}
-        </div>
-      </Drawer>
     </header>
   );
 };
