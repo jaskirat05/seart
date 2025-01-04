@@ -70,7 +70,7 @@ export function useGenerationStatus({
     // Subscribe to changes
     console.log('Setting up subscription...');
     const subscription = supabase
-      .channel('any')
+      .channel(generationId)
       .on(
         'postgres_changes',
         {

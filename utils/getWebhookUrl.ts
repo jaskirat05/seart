@@ -1,11 +1,15 @@
 export function getWebhookUrl(): string {
+  console.log('Environment isLocal:', process.env.isLocal);
+  
   // Check if we're in Vercel production environment
   if (process.env.isLocal === 'false') {
-    return `${process.env.VERCEL_URL_PROV}/api/webhook`;
+    const prodUrl = `${process.env.VERCEL_URL_PROV}/api/webhook`;
+    console.log('Using production webhook URL:', prodUrl);
+    return prodUrl;
   }
-
   
-
   // Default to ngrok for local development
-  return "https://2bcc-110-235-233-146.ngrok-free.app/api/webhook";
+  const localUrl = `${process.env.Local_Hook}/api/webhook`;
+  console.log('Using local webhook URL:', localUrl);
+  return localUrl;
 }

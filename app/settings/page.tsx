@@ -2,49 +2,35 @@
 import { useState } from 'react';
 import { useUser } from '@clerk/nextjs';
 import Header from '../components/Header';
-import { useImageGeneration} from '@/hooks/useImageGeneration';  
-import { useGenerationStatus } from '@/hooks/useGenerationStatus';  
+import { useMultiImageGeneration } from '@/hooks/useMultiImageGeneration';
 import { ImageResolution, ImageResolutions } from '@/types/imageResolution';
 
 const Settings = () => {
   const { user } = useUser();
   const [model, setModel] = useState('flux');
   const [prompt, setPrompt] = useState('');
- const [imgResolution,setResolution]=useState<ImageResolution>(ImageResolutions.PORTRAIT);
-  const [seed, setSeed] = useState(0);  
-
+  const [imgResolution, setResolution] = useState<ImageResolution>(ImageResolutions.PORTRAIT);
+  const [seed, setSeed] = useState(0);
   const [noOfImages, setNoOfImages] = useState(1);
-  const [generationId, setGenerationId] = useState<string>();
 
-  const { generate, isLoading } = useImageGeneration();
-  const { status, imageUrl } = useGenerationStatus({
-    generationId,
-    onComplete: (url) => {
-      console.log('Generation complete:', url);
-    },
-    onError: () => {
-      setGenerationId(undefined);
-    }
-  });
-  const handleResolutionChange = (resolution: ImageResolution) => {  
-    setResolution(resolution);  
+  const { generate, generations, isAnyLoading } = useMultiImageGeneration();
+
+  const handleResolutionChange = (resolution: ImageResolution) => {
+    setResolution(resolution);
   }
+
   const handleGenerate = async () => {
-    const newGenerationId = await generate({
+    await generate({
       prompt,
+      numberOfImages: noOfImages,
       settings: {
-        height:imgResolution.height,
-        width:imgResolution.width,
-        seed:seed,
-        model:model,
-        nImages:noOfImages 
+        height: imgResolution.height,
+        width: imgResolution.width,
+        seed: seed,
+        model: model,
+        nImages:Number(1)
       }
     });
-    
-    if (newGenerationId) {
-      setGenerationId(newGenerationId);
-    }
-  
   };
 
   return (
@@ -174,42 +160,51 @@ const Settings = () => {
                 />
                 <button 
                   onClick={handleGenerate}
-                  disabled={isLoading}
+                  disabled={isAnyLoading}
                   className="bg-[#FFA41D] text-white px-10 py-4 rounded-xl transition-colors font-medium m-2 hover:bg-opacity-90 disabled:bg-opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? 'Generating...' : 'Generate'}
+                  {isAnyLoading ? 'Generating...' : 'Generate'}
                 </button>
               </div>
             </div>
 
             {/* Generations Display Area */}
             <div className="mt-6 bg-white rounded-xl p-6 shadow-sm min-h-[400px]">
-              {/* Show generated image if available */}
-              {imageUrl ? (
-                <div className="flex justify-center">
-                  <img src={imageUrl} alt="Generated" className="max-w-full rounded-lg" />
+              {generations.length > 0 ? (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {generations.map((gen) => (
+                    <div 
+                      key={gen.id}
+                      className="aspect-square bg-gray-50 rounded-lg flex items-center justify-center relative overflow-hidden"
+                    >
+                      {gen.isLoading && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
+                          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FFA41D]"></div>
+                        </div>
+                      )}
+                      {gen.status === 'completed' && gen.imageUrl && (
+                        <img 
+                          src={gen.imageUrl} 
+                          alt="Generated" 
+                          className="w-full h-full object-cover"
+                        />
+                      )}
+                      {gen.status === 'failed' && (
+                        <div className="text-red-500">Generation failed</div>
+                      )}
+                    </div>
+                  ))}
                 </div>
               ) : (
-                /* Single Row of Image Placeholders */
-                <div className="flex gap-4 h-full">
-                  {[1, 2, 3, 4].map((_, i) => (
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {Array.from({ length: noOfImages }).map((_, i) => (
                     <div 
-                      key={i} 
-                      className="flex-1 aspect-square bg-gray-50 rounded-lg flex items-center justify-center relative overflow-hidden"
-                      
+                      key={i}
+                      className="aspect-square bg-gray-50 rounded-lg flex items-center justify-center"
                     >
                       <span className="material-symbols-outlined text-gray-200" style={{ fontSize: '120px' }}>
-                        animated_images
+                        image
                       </span>
-                      {/* Skeleton Animation (shown when loading) */}
-                      <div className={`absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-200 animate-shimmer ${isLoading ? '' : 'hidden'}`}>
-                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white to-transparent" 
-                             style={{ 
-                               backgroundSize: '200% 100%',
-                               animation: 'shimmer 2s infinite linear'
-                             }}
-                        ></div>
-                      </div>
                     </div>
                   ))}
                 </div>
