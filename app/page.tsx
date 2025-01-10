@@ -1,8 +1,11 @@
-//import Image from "next/image";
+import { KeyHandler } from './components/KeyHandler';
 import Hero from './components/Hero';
 
-export default function Home() {
+export default function () {
   return (
- <Hero /> 
+    <main>
+      <KeyHandler />
+      <Hero />
+    </main>
   );
 }

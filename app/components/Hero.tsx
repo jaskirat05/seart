@@ -108,7 +108,7 @@ const Hero = () => {
   };
 
   return (
-    <section className="w-full flex flex-col items-center justify-center pt-24 px-4">
+    <section className="w-full flex flex-col items-center justify-center pt-[155px] px-4">
       {/* Headline */}
       <h1 className="text-4xl md:text-6xl font-black text-center">
         Create art in seconds

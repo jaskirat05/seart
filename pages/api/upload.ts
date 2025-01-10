@@ -118,9 +118,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Create generation in database
     const generation: CreateImageGeneration = {
+      user_id: null,
       job_id: runpodId,
       name: null,
-      user_id: userId || null,  
+      clerk_id: userId || null,  
       session_id: sessionId || null,
       prompt: prompt,
       favorite: false,

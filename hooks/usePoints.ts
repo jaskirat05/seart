@@ -39,7 +39,7 @@ export function usePoints({ userId, sessionId }: UsePointsProps) {
     });
 
     const channel = supabase
-      .channel('points_changes')
+      .channel(userId ? userId: sessionId!)
       .on(
         'postgres_changes',
         {
@@ -47,7 +47,7 @@ export function usePoints({ userId, sessionId }: UsePointsProps) {
           schema: 'public',
           table: userId ? 'user_points' : 'anonymous_sessions',
           filter: userId 
-            ? `user_id=eq.${userId}` 
+            ? `clerk_user_id=eq.${userId}` 
             : `id=eq.${sessionId}`,
         },
         (payload: PointsPayload) => {
@@ -70,7 +70,7 @@ export function usePoints({ userId, sessionId }: UsePointsProps) {
   const fetchPoints = async () => {
     console.log('Fetching points for:', {
       type: userId ? 'user' : 'session',
-      id: userId || sessionId
+      id: userId?userId: sessionId
     });
     try {
       setLoading(true);
@@ -79,13 +79,13 @@ export function usePoints({ userId, sessionId }: UsePointsProps) {
       if (userId) {
         // Fetch points for authenticated user
         const { data, error } = await supabase
-          .from('users')
-          .select('points_balance')
-          .eq('id', userId)
+          .from('user_points')
+          .select('points_remaining')
+          .eq('clerk_user_id', userId)
           .single();
 
         if (error) throw error;
-        setPoints(data?.points_balance ?? null);
+        setPoints(data?.points_remaining ?? null);
       } else if (sessionId) {
         // Fetch points for unauthenticated session
         const { data, error } = await supabase
@@ -112,16 +112,16 @@ export function usePoints({ userId, sessionId }: UsePointsProps) {
       
       if (userId) {
         const { error } = await supabase
-          .from('users')
-          .update({ points_balance: newPoints })
-          .eq('id', userId);
+          .from('user_points')
+          .update({ points_remaining: newPoints })
+          .eq('clerk_user_id', userId);
 
         if (error) throw error;
       } else if (sessionId) {
         const { error } = await supabase
-          .from('sessions')
-          .update({ points: newPoints })
-          .eq('session_id', sessionId);
+          .from('anonymous_sessions')
+          .update({ points_remaining: newPoints })
+          .eq('id', sessionId);
 
         if (error) throw error;
       }

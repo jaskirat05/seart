@@ -33,8 +33,9 @@ export default function RootLayout({
           />
         </head>
         <body className={montserrat.className}>
-        <HeaderWrapper />
-          <main className="pt-[155px]">
+        
+          <main>
+          <HeaderWrapper />
             {children}
           </main>
           <Toaster richColors position="top-center" />

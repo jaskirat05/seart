@@ -15,6 +15,7 @@ export interface ModelSettings {
 
 export interface ImageGeneration {
   id: number;
+  clerk_id:string|null;
   job_id: string;
   user_id: string | null;
   session_id: string | null;    // Updated to support UUID type

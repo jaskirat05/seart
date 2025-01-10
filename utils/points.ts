@@ -27,10 +27,11 @@ export class PointsManager {
   }
 
   static async getUserPoints(userId: string): Promise<UserPoints | null> {
+    console.log('Getting user points for:', userId);
     const { data: userPoints } = await supabaseAdmin
       .from('user_points')
       .select('*')
-      .eq('user_id', userId)
+      .eq('clerk_user_id', userId)
       .single();
 
     return userPoints;
@@ -45,7 +46,7 @@ export class PointsManager {
           points_remaining: supabaseAdmin.rpc('decrement', { x:Number(amount) }),  
           last_generation: new Date().toISOString()
         })
-        .eq('user_id', userId)
+        .eq('clerk_user_id', userId)
         .select('points_remaining')
         .single();
 
@@ -63,6 +64,7 @@ export class PointsManager {
 
   static async checkPointsAvailable(userId: string | null, sessionId: string | null): Promise<{ hasPoints: boolean; pointsBalance: number }> {
     if (userId) {
+      console.log('Checking points for user:', userId);
       const userPoints = await this.getUserPoints(userId);
       return {
         hasPoints: userPoints?.points_remaining! > 0,
