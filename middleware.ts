@@ -11,6 +11,7 @@ import { cookies } from 'next/headers'
 import { q } from "framer-motion/client";
 
 const publicRoutes = createRouteMatcher(["/", "/api/webhook", "/api/upload","api/signUp","/login"]);
+const webhookRoutes = createRouteMatcher(["/api/webhook"]);
 
 export default clerkMiddleware(async (auth, req) => {  
   
@@ -40,7 +41,9 @@ export default clerkMiddleware(async (auth, req) => {
         }
       }
     // For authenticated users, add user ID
-    
+    if(webhookRoutes(req)){
+        return response;
+    }
     // For anonymous users on public routes that need session
     if (!userId && publicRoutes(req)) {
         console.log("in a publicrouter")
