@@ -11,7 +11,7 @@ import { cookies } from 'next/headers'
 import { q } from "framer-motion/client";
 
 const publicRoutes = createRouteMatcher(["/", "/api/webhook", "/api/upload","api/signUp","/login"]);
-const webhookRoutes = createRouteMatcher(["/api/webhook"]);
+const webhookRoutes = createRouteMatcher(["/api/webhook","/api/signUp"]);
 
 export default clerkMiddleware(async (auth, req) => {  
   
