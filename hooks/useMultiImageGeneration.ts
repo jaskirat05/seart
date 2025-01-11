@@ -95,7 +95,15 @@ export function useMultiImageGeneration(): UseMultiImageGenerationReturn {
                 nImages: Number(1)  // Keep the nImages setting from page.tsx
               }
             })
-          }).then(r => r.json())
+          }).then(async response => {
+            if (response.status === 403) {
+              throw new Error('INSUFFICIENT_POINTS');
+            }
+            if (!response.ok) {
+              throw new Error('Failed to generate image');
+            }
+            return response.json();
+          })
         }
       );
 

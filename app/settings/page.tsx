@@ -4,6 +4,7 @@ import { useUser } from '@clerk/nextjs';
 import Header from '../components/Header';
 import { useMultiImageGeneration } from '@/hooks/useMultiImageGeneration';
 import { ImageResolution, ImageResolutions } from '@/types/imageResolution';
+import { toast } from 'sonner';
 
 const Settings = () => {
   const { user } = useUser();
@@ -20,17 +21,30 @@ const Settings = () => {
   }
 
   const handleGenerate = async () => {
-    await generate({
-      prompt,
-      numberOfImages: noOfImages,
-      settings: {
-        height: imgResolution.height,
-        width: imgResolution.width,
-        seed: seed,
-        model: model,
-        nImages:Number(1)
+    if (!prompt.trim()) {
+      toast.error('Please enter a prompt');
+      return;
+    }
+    
+    try {
+      await generate({
+        prompt,
+        numberOfImages: noOfImages,
+        settings: {
+          height: imgResolution.height,
+          width: imgResolution.width,
+          seed: seed,
+          model: model,
+          nImages: Number(1)
+        }
+      });
+    } catch (error: any) {
+      if (error.message === 'INSUFFICIENT_POINTS') {
+        toast.error('Not enough points to generate images');
+      } else {
+        toast.error('Failed to generate images');
       }
-    });
+    }
   };
 
   return (
