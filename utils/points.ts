@@ -40,18 +40,8 @@ export class PointsManager {
   static async deductPoints(userId: string | null, sessionId: string | null, amount: number = 1): Promise<number> {
     if (userId) {
       // Deduct from user points
-      const { data: userPoints, error } = await supabaseAdmin
-        .from('user_points')
-        .update({
-          points_remaining: supabaseAdmin.rpc('decrement', { x:Number(amount) }),  
-          last_generation: new Date().toISOString()
-        })
-        .eq('clerk_user_id', userId)
-        .select('points_remaining')
-        .single();
-
-      if (error) throw error;
-      return userPoints.points_remaining;
+      const { data: decrementedPoints, error: decrementError } = await supabaseAdmin.rpc('decrementPoints', { userID: userId, x: amount });
+      return decrementedPoints;
     } else if (sessionId) {
       const { data: decrementedPoints, error: decrementError } = await supabaseAdmin.rpc('decrement', { seesion_id: sessionId, x: amount });
       // Deduct from anonymous session

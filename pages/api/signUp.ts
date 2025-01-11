@@ -67,11 +67,21 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
 
       // Get active session if it exists
-      
+      const { data: session, error: sessionError } = await supabaseAdmin
+        .from('anonymous_sessions')
+        .select('*')
+        .eq('id', sessionId)
+        .eq('status', 'active')
+        .single();
+
+      if (sessionError && sessionError.code !== 'PGRST116') {
+        console.error('Error fetching session:', sessionError);
+        return res.status(500).json({ error: 'Failed to fetch session' });
+      }
 
       // Calculate points
       const basePoints = 10;
-      const sessionPoints = session?.points_remaining ?? 0;
+      const sessionPoints = session.points_remaining ?? 0;
       const totalPoints = basePoints + sessionPoints;
 
       // Create user points record using session ID as user_id

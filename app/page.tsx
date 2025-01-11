@@ -1,10 +1,10 @@
-import { KeyHandler } from './components/KeyHandler';
+
 import Hero from './components/Hero';
 
-export default function () {
+export default function Home() {
   return (
     <main>
-      <KeyHandler />
+    
       <Hero />
     </main>
   );

@@ -7,7 +7,7 @@ import { ImageResolution, ImageResolutions } from '@/types/imageResolution';
 
 const Settings = () => {
   const { user } = useUser();
-  const [model, setModel] = useState('flux');
+  const [model, setModel] = useState('pony');
   const [prompt, setPrompt] = useState('');
   const [imgResolution, setResolution] = useState<ImageResolution>(ImageResolutions.PORTRAIT);
   const [seed, setSeed] = useState(0);
@@ -52,7 +52,7 @@ const Settings = () => {
                   onChange={(e) => setModel(e.target.value)}
                   className="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-[#FFA41D] focus:border-[#FFA41D] rounded-md"
                 >
-                  <option value="flux">Flux 1.1</option>
+                  <option value="flux">Flux Dev</option>
                   <option value="pony">Pony Diffusion</option>
                 </select>
               </div>

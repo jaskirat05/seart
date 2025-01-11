@@ -1,5 +1,6 @@
 import workflowH from '../../constants/workflow-height.json';
 import ponyAdv from '../../constants/workflow-square.json'; 
+import fluxDev from '../../constants/flux-workflow.json';
 import type { NextApiRequest, NextApiResponse } from 'next';
 import { getAuth } from '@clerk/nextjs/server';
 import { supabaseAdmin } from '@/utils/supabaseAdmin';
@@ -18,24 +19,30 @@ export const config = {
 }
 
 async function imageAdapter(prompt: string, settings: ModelSettings) {
-  const jsonData = JSON.parse(JSON.stringify(ponyAdv));
+  
+  const jsonData = settings.model ==='pony'? JSON.parse(JSON.stringify(ponyAdv)): settings.model ==='flux'?JSON.parse(JSON.stringify(fluxDev)):JSON.parse(JSON.stringify(ponyAdv));
   
   // Update the dimensions in node 6 of the workflow
+  if (settings.model==="flux"){
+    jsonData.input.workflow[12].inputs.width = settings.width;
+    jsonData.input.workflow[12].inputs.height = settings.height;
+  }
+  else if(settings.model==="pony"){
   jsonData.input.workflow[6].inputs.width = settings.width;
-  jsonData.input.workflow[6].inputs.height = settings.height;
+  jsonData.input.workflow[6].inputs.height = settings.height;}
   if (settings.seed) {
     jsonData.input.workflow[1].inputs.seed = settings.seed;
   }
 
 
   // Update the prompt in node 4 by replacing the placeholder
-  const promptWithQuality = `${prompt}, highly detailed, high quality`;
+  const promptWithQuality = `${prompt}`;
   jsonData.input.workflow[4].inputs.text = promptWithQuality;
   
   // Update webhook URL based on environment
   const webhookUrl = getWebhookUrl();
   jsonData.webhook = webhookUrl;
-  jsonData.input.workflow["6"].inputs.batch_size = settings.nImages;
+
   
   const workflowStr = JSON.stringify(jsonData);
   console.log('Workflow configuration:', {
@@ -118,7 +125,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     // Create generation in database
     const generation: CreateImageGeneration = {
-      user_id: null,
+      user_id: userId || null,
       job_id: runpodId,
       name: null,
       clerk_id: userId || null,  
