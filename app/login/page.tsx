@@ -7,6 +7,7 @@ import { FcGoogle } from 'react-icons/fc';
 import { useSignIn, useSignUp } from '@clerk/nextjs';
 import { useRouter } from 'next/navigation';
 import { storeSessionId } from './_action';
+import Error from 'next/error';
 ;
 
 type AuthMode = 'signin' | 'signup';
@@ -38,7 +39,7 @@ export default function AuthPage() {
         await setActive!({ session: result.createdSessionId });
         router.push("/");
       }
-    } catch (err: any) {
+    } catch (err:any) {
       console.error(JSON.stringify(err, null, 2));
       setError(err.errors?.[0]?.message || 'An error occurred');
     }

@@ -24,20 +24,20 @@ async function imageAdapter(prompt: string, settings: ModelSettings) {
   
   // Update the dimensions in node 6 of the workflow
   if (settings.model==="flux"){
-    jsonData.input.workflow[12].inputs.width = settings.width;
-    jsonData.input.workflow[12].inputs.height = settings.height;
+    jsonData.input.workflow[5].inputs.width = settings.width;
+    jsonData.input.workflow[5].inputs.height = settings.height;
+    if (settings.seed){
+    jsonData.input.workflow[25].inputs.noise_seed = settings.seed;}
+    jsonData.input.workflow[6].inputs.text = prompt;
   }
   else if(settings.model==="pony"){
   jsonData.input.workflow[6].inputs.width = settings.width;
-  jsonData.input.workflow[6].inputs.height = settings.height;}
+  jsonData.input.workflow[6].inputs.height = settings.height;
   if (settings.seed) {
     jsonData.input.workflow[1].inputs.seed = settings.seed;
   }
-
-
-  // Update the prompt in node 4 by replacing the placeholder
   const promptWithQuality = `${prompt}`;
-  jsonData.input.workflow[4].inputs.text = promptWithQuality;
+  jsonData.input.workflow[4].inputs.text = promptWithQuality;}
   
   // Update webhook URL based on environment
   const webhookUrl = getWebhookUrl();
@@ -46,7 +46,7 @@ async function imageAdapter(prompt: string, settings: ModelSettings) {
   
   const workflowStr = JSON.stringify(jsonData);
   console.log('Workflow configuration:', {
-    prompt: promptWithQuality,
+    prompt: prompt,
     dimensions: { width: settings.width, height: settings.height },
     webhookUrl,
    

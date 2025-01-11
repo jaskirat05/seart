@@ -1,54 +1,19 @@
 {
     "input": {
       "workflow":{
-        "1": {
+        "5": {
           "inputs": {
-            "seed": 373015577279140,
-            "steps": 25,
-            "cfg": 3,
-            "sampler_name": "euler",
-            "scheduler": "normal",
-            "denoise": 1,
-            "model": [
-              "2",
-              0
-            ],
-            "positive": [
-              "4",
-              0
-            ],
-            "negative": [
-              "3",
-              0
-            ],
-            "latent_image": [
-              "12",
-              0
-            ]
+            "width": 1024,
+            "height": 1024,
+            "batch_size": 1
           },
-          "class_type": "KSampler"
+          "class_type": "EmptyLatentImage"
         },
-        "2": {
+        "6": {
           "inputs": {
-            "ckpt_name": "flux1-dev-fp8.safetensors"
-          },
-          "class_type": "CheckpointLoaderSimple"
-        },
-        "3": {
-          "inputs": {
-            "text": " ",
+            "text": "latino steampunk man similar to orlando bloom, handsome, styled hair, after club night walking home in New York City, he is sitting with his friends on balcony in berlin city luxury apartment",
             "clip": [
-              "13",
-              0
-            ]
-          },
-          "class_type": "CLIPTextEncode"
-        },
-        "4": {
-          "inputs": {
-            "text": "photo of a girl",
-            "clip": [
-              "13",
+              "11",
               0
             ]
           },
@@ -57,19 +22,19 @@
         "8": {
           "inputs": {
             "samples": [
-              "1",
+              "13",
               0
             ],
             "vae": [
-              "14",
+              "10",
               0
             ]
           },
           "class_type": "VAEDecode"
         },
-        "10": {
+        "9": {
           "inputs": {
-            "filename_prefix": "ComfyUI",
+            "filename_prefix": "Flux",
             "images": [
               "8",
               0
@@ -77,27 +42,88 @@
           },
           "class_type": "SaveImage"
         },
-        "12": {
-          "inputs": {
-            "width": 1024,
-            "height": 1024,
-            "batch_size": 1
-          },
-          "class_type": "EmptySD3LatentImage"
-        },
-        "13": {
-          "inputs": {
-            "clip_name1": "t5xxl_fp8_e4m3fn.safetensors",
-            "clip_name2": "ViT-L-14-TEXT-detail-improved-hiT-GmP-HF.safetensors",
-            "type": "flux"
-          },
-          "class_type": "DualCLIPLoader"
-        },
-        "14": {
+        "10": {
           "inputs": {
             "vae_name": "ae.safetensors"
           },
           "class_type": "VAELoader"
+        },
+        "11": {
+          "inputs": {
+            "clip_name1": "t5xxl_fp8_e4m3fn.safetensors",
+            "clip_name2": "clip_l.safetensors",
+            "type": "flux"
+          },
+          "class_type": "DualCLIPLoader"
+        },
+        "12": {
+          "inputs": {
+            "unet_name": "flux_dev.safetensors",
+            "weight_dtype": "fp8_e4m3fn"
+          },
+          "class_type": "UNETLoader"
+        },
+        "13": {
+          "inputs": {
+            "noise": [
+              "25",
+              0
+            ],
+            "guider": [
+              "22",
+              0
+            ],
+            "sampler": [
+              "16",
+              0
+            ],
+            "sigmas": [
+              "17",
+              0
+            ],
+            "latent_image": [
+              "5",
+              0
+            ]
+          },
+          "class_type": "SamplerCustomAdvanced"
+        },
+        "16": {
+          "inputs": {
+            "sampler_name": "euler"
+          },
+          "class_type": "KSamplerSelect"
+        },
+        "17": {
+          "inputs": {
+            "scheduler": "simple",
+            "steps": 25,
+            "denoise": 1,
+            "model": [
+              "12",
+              0
+            ]
+          },
+          "class_type": "BasicScheduler"
+        },
+        "22": {
+          "inputs": {
+            "model": [
+              "12",
+              0
+            ],
+            "conditioning": [
+              "6",
+              0
+            ]
+          },
+          "class_type": "BasicGuider"
+        },
+        "25": {
+          "inputs": {
+            "noise_seed": 630464641098877
+          },
+          "class_type": "RandomNoise"
         }
       }
       
