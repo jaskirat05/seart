@@ -1,5 +1,7 @@
 "use client"
 import { motion } from 'framer-motion';
+import { toast } from 'sonner';
+import { useState } from 'react';
 
 interface ImageDisplayProps {
   imageUrl?: string;
@@ -9,6 +11,40 @@ interface ImageDisplayProps {
 }
 
 const ImageDisplay = ({ imageUrl, isLoading, seed, onRefresh }: ImageDisplayProps) => {
+  const [isDownloading, setIsDownloading] = useState(false);
+
+  const handleDownload = async () => {
+    if (!imageUrl) {
+      toast.error('No image available to download');
+      return;
+    }
+
+    setIsDownloading(true);
+    try {
+      const response = await fetch(`/api/download?url=${encodeURIComponent(imageUrl)}`);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `seart-${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      toast.success('Image downloaded successfully');
+    } catch (error) {
+      console.error('Error downloading image:', error);
+      toast.error('Failed to download image. Please try again.');
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   return (
     <div className="flex flex-col items-center mt-12">
       {/* Image Container with 3D effect and skeleton loading */}
@@ -75,12 +111,22 @@ const ImageDisplay = ({ imageUrl, isLoading, seed, onRefresh }: ImageDisplayProp
           className="flex flex-col items-center group"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
-          disabled={!imageUrl}
+          onClick={handleDownload}
+          disabled={!imageUrl || isDownloading}
         >
-          <span className="material-symbols-outlined text-4xl opacity-50 text-[#3E7CB1] mb-2 group-hover:opacity-100 transition-opacity">
-            download
-          </span>
-          <span className="text-[#666464] text-sm">Download</span>
+          {isDownloading ? (
+            <>
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-[#3E7CB1] border-t-transparent mb-2" />
+              <span className="text-[#666464] text-sm">Downloading...</span>
+            </>
+          ) : (
+            <>
+              <span className="material-symbols-outlined text-4xl opacity-50 text-[#3E7CB1] mb-2 group-hover:opacity-100 transition-opacity">
+                download
+              </span>
+              <span className="text-[#666464] text-sm">Download</span>
+            </>
+          )}
         </motion.button>
       </div>
     </div>

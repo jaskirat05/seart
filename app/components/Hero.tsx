@@ -12,7 +12,7 @@ const Hero = () => {
   const { user, isLoaded } = useUser();
   const [currentimageUrl,setImageUrl] = useState<string>();  
   const [seed, setSeed] = useState(0);  
-  
+  const [isDownloading, setIsDownloading] = useState(false);
 
   console.log('Hero render - generationId:', generationId);
 
@@ -107,8 +107,9 @@ const Hero = () => {
     }
   };
 
+  
   return (
-    <section className="w-full flex flex-col items-center justify-center pt-[155px] px-4">
+    <section className="w-full flex flex-col items-center justify-center mt-[70px] px-4">
       {/* Headline */}
       <h1 className="text-4xl md:text-6xl font-black text-center">
         Create art in seconds
@@ -157,7 +158,8 @@ const Hero = () => {
       </div>
 
       {/* Image Display with Action Buttons */}
-      <ImageDisplay imageUrl={currentimageUrl} isLoading={isLoading} seed= {seed} onRefresh={generateSeed} />
+     
+      <ImageDisplay imageUrl={imageUrl} isLoading={isLoading} seed= {seed} onRefresh={generateSeed} />
     </section>
   );
 };

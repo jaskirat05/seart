@@ -1,16 +1,22 @@
 import './globals.css'
 import Header from './components/Header'
 import { Montserrat } from 'next/font/google'
+import { Fredoka } from 'next/font/google'
 import { Metadata } from 'next'
 import { Toaster } from 'sonner';
 import { ClerkProvider } from '@clerk/nextjs';
 import HeaderWrapper from './components/HeaderWrapper';
+import Providers from './providers';
 
 const montserrat = Montserrat({ 
   subsets: ['latin'],
-  display: 'swap',
   variable: '--font-montserrat',
   weight: ['400', '500', '600', '700']
+})
+
+const fredoka = Fredoka({ 
+  subsets: ['latin'],
+  variable: '--font-fredoka'
 })
 
 export const metadata: Metadata = {
@@ -20,12 +26,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
     <ClerkProvider>
-      <html lang="en">
+      <html lang="en" className={`${montserrat.variable} ${fredoka.variable}`}>
         <head>
           <link
             rel="stylesheet"
@@ -36,7 +42,9 @@ export default function RootLayout({
         
           <main>
           <HeaderWrapper />
-            {children}
+            <Providers>
+              {children}
+            </Providers>
           </main>
           <Toaster richColors position="top-center" />
         </body>

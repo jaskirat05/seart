@@ -88,17 +88,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Get session ID from headers or create new anonymous session
     let sessionId: string | undefined;
     if (!userId) {
-      const forwarded = req.headers["x-forwarded-for"];
-      const ip = forwarded 
-        ? (Array.isArray(forwarded) ? forwarded[0] : forwarded.split(', ')[0]) 
-        : req.socket.remoteAddress;
-      
-      if (!ip) {
-        return res.status(400).json({ error: 'Could not determine client IP' });
-      }
-
-      const session = await PointsManager.getOrCreateAnonymousSession(ip);
-      sessionId = session.id;
+      sessionId=req.headers['x-session-id'] as string;
+      console.log('Session ID in upload:', sessionId);
     }
 
     const { prompt, settings } = req.body;
@@ -107,17 +98,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
 
     // Check points availability
-    const { hasPoints, pointsBalance } = await PointsManager.checkPointsAvailable(
+    const { hasPoints, pointsBalance,shouldLogin } = await PointsManager.checkPointsAvailable(
       userId || null,
       sessionId || null
     );
 
-    if (!hasPoints) {
+    if (!hasPoints && !shouldLogin) {
       return res.status(403).json({
         error: 'Insufficient points',
         pointsBalance,
         required: 1
       });
+    }
+    else if(!hasPoints||hasPoints && shouldLogin){
+      console.log("login required")
+      return res.status(410).json({
+        error:"login required"
+      })
     }
 
     // Create RunPod job

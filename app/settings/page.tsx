@@ -8,9 +8,9 @@ import { toast } from 'sonner';
 
 const Settings = () => {
   const { user } = useUser();
-  const [model, setModel] = useState('pony');
+  const [model, setModel] = useState('flux');
   const [prompt, setPrompt] = useState('');
-  const [imgResolution, setResolution] = useState<ImageResolution>(ImageResolutions.PORTRAIT);
+  const [imgResolution, setResolution] = useState<ImageResolution>(ImageResolutions.FLUXSQUARE);
   const [seed, setSeed] = useState(0);
   const [noOfImages, setNoOfImages] = useState(1);
 
@@ -33,15 +33,20 @@ const Settings = () => {
         settings: {
           height: imgResolution.height,
           width: imgResolution.width,
-          seed: seed,
+          seed: seed==0?Math.floor(Math.random() * 2147483647) + 1:seed,
           model: model,
-          nImages: Number(1)
+          nImages: Number(1),
+          
         }
       });
     } catch (error: any) {
       if (error.message === 'INSUFFICIENT_POINTS') {
         toast.error('Not enough points to generate images');
-      } else {
+      } 
+      else if (error.message === 'LOGIN REQUIRED'){
+        toast.error('Please login to generate images');
+      }
+        else {
         toast.error('Failed to generate images');
       }
     }
@@ -63,7 +68,12 @@ const Settings = () => {
                 <h3 className="text-base font-medium text-gray-700">Model</h3>
                 <select
                   value={model}
-                  onChange={(e) => setModel(e.target.value)}
+                  onChange={
+                    (e) => {
+                      setModel(e.target.value);
+                      handleResolutionChange(model === 'flux' ? ImageResolutions.FLUXSQUARE : ImageResolutions.SQUARE);
+                    }
+                  }
                   className="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-[#FFA41D] focus:border-[#FFA41D] rounded-md"
                 >
                   <option value="flux">Flux Dev</option>
@@ -77,13 +87,13 @@ const Settings = () => {
                 <div className="mt-2 grid grid-cols-3 gap-2">
                   <button 
                     className={`aspect-square border rounded-md hover:bg-gray-50 focus:outline-none relative group overflow-hidden
-                      ${imgResolution === ImageResolutions.SQUARE 
+                      ${imgResolution === ImageResolutions.SQUARE || imgResolution === ImageResolutions.FLUXSQUARE
                         ? 'border-[#FFA41D] shadow-[0_0_10px_rgba(255,164,29,0.3)]' 
                         : 'border-gray-300'}`}
-                    onClick={() => handleResolutionChange(ImageResolutions.SQUARE)}
+                    onClick={() => handleResolutionChange(model === 'flux' ? ImageResolutions.FLUXSQUARE : ImageResolutions.SQUARE)}
                   >
                     <div className={`absolute inset-2 rounded transition-colors
-                      ${imgResolution === ImageResolutions.SQUARE 
+                      ${imgResolution === ImageResolutions.SQUARE || imgResolution === ImageResolutions.FLUXSQUARE
                         ? 'bg-[#FFA41D]/10' 
                         : 'bg-gray-100 group-hover:bg-gray-200'}`}
                     ></div>
@@ -91,27 +101,27 @@ const Settings = () => {
                   </button>
                   <button 
                     className={`aspect-[9/5] border rounded-md hover:bg-gray-50 focus:outline-none relative group overflow-hidden
-                      ${imgResolution === ImageResolutions.LANDSCAPE 
+                      ${imgResolution === ImageResolutions.LANDSCAPE ||imgResolution === ImageResolutions.FLUXLANDSCAPE
                         ? 'border-[#FFA41D] shadow-[0_0_10px_rgba(255,164,29,0.3)]' 
                         : 'border-gray-300'}`}
-                    onClick={() => handleResolutionChange(ImageResolutions.LANDSCAPE)}
+                    onClick={() => handleResolutionChange(model === 'flux' ? ImageResolutions.FLUXLANDSCAPE : ImageResolutions.LANDSCAPE)}
                   >
                     <div className={`absolute inset-2 rounded transition-colors
-                      ${imgResolution === ImageResolutions.LANDSCAPE 
+                      ${imgResolution === ImageResolutions.LANDSCAPE || imgResolution === ImageResolutions.FLUXLANDSCAPE
                         ? 'bg-[#FFA41D]/10' 
                         : 'bg-gray-100 group-hover:bg-gray-200'}`}
                     ></div>
-                    <span className="absolute inset-0 flex items-center justify-center text-sm font-medium text-gray-700">9:5</span>
+                    <span className="absolute inset-0 flex items-center justify-center text-sm font-medium text-gray-700">9:16</span>
                   </button>
                   <button 
                     className={`aspect-[9/16] border rounded-md hover:bg-gray-50 focus:outline-none relative group overflow-hidden
-                      ${imgResolution === ImageResolutions.PORTRAIT 
+                      ${imgResolution === ImageResolutions.PORTRAIT || imgResolution === ImageResolutions.FLUXPORTRAIT
                         ? 'border-[#FFA41D] shadow-[0_0_10px_rgba(255,164,29,0.3)]' 
                         : 'border-gray-300'}`}
-                    onClick={() => handleResolutionChange(ImageResolutions.PORTRAIT)}
+                    onClick={() => handleResolutionChange(model === 'flux' ? ImageResolutions.FLUXPORTRAIT : ImageResolutions.PORTRAIT)}
                   >
                     <div className={`absolute inset-2 rounded transition-colors
-                      ${imgResolution === ImageResolutions.PORTRAIT 
+                      ${imgResolution === ImageResolutions.PORTRAIT || imgResolution === ImageResolutions.FLUXPORTRAIT
                         ? 'bg-[#FFA41D]/10' 
                         : 'bg-gray-100 group-hover:bg-gray-200'}`}
                     ></div>
@@ -145,9 +155,7 @@ const Settings = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="text-base font-medium text-gray-900">Plan</h3>
-                  <p className="mt-1 text-sm text-gray-500">
-                    Your generations will appear here
-                  </p>
+                 
                 </div>
                 <button className="bg-[#FFA41D] text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors">
                   Upgrade

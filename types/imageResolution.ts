@@ -18,6 +18,18 @@ export class ImageResolutions {
     width: 832,
     height: 1216
   };
+  static readonly FLUXSQUARE: ImageResolution = {
+    width:1024,
+    height:1024
+  };
+  static readonly FLUXPORTRAIT: ImageResolution = {
+    width:592,
+    height:1024
+  };
+  static readonly FLUXLANDSCAPE: ImageResolution = {
+    width:1024,
+    height:592
+  };
 
   static getResolution(type: 'square' | 'landscape' | 'portrait'): ImageResolution {
     switch (type) {

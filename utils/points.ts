@@ -53,24 +53,27 @@ export class PointsManager {
     throw new Error('Either userId or sessionId must be provided');
   }
 
-  static async checkPointsAvailable(userId: string | null, sessionId: string | null): Promise<{ hasPoints: boolean; pointsBalance: number }> {
+  static async checkPointsAvailable(userId: string | null, sessionId: string | null): Promise<{ hasPoints: boolean; pointsBalance: number;shouldLogin:boolean }> {
     if (userId) {
       console.log('Checking points for user:', userId);
       const userPoints = await this.getUserPoints(userId);
       return {
         hasPoints: userPoints?.points_remaining! > 0,
-        pointsBalance: userPoints?.points_remaining || 0
+        pointsBalance: userPoints?.points_remaining || 0,
+        shouldLogin:false
       };
     } else if (sessionId) {
+      console.log('Checking points for session:', sessionId);
       const { data: session } = await supabaseAdmin
         .from('anonymous_sessions')
-        .select('points_remaining')
+        .select('points_remaining,status')
         .eq('id', sessionId)
         .single();
 
       return {
         hasPoints: session?.points_remaining > 0,
-        pointsBalance: session?.points_remaining || 0
+        pointsBalance: session?.points_remaining || 0,
+        shouldLogin:session?.status=='converted'?true:false
       };
     }
 

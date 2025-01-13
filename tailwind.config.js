@@ -16,6 +16,9 @@ module.exports = {
           '100%': { backgroundPosition: '200% 0' },
         },
       },
+      fontFamily: {
+        fredoka: ['var(--font-fredoka)'],
+      },
     },
   },
   plugins: [],

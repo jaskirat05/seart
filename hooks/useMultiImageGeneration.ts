@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useGenerationStatus, GenerationStatus } from './useGenerationStatus';
 import { ModelSettings } from '@/types/database';
 import { ImageResolutions } from '@/types/imageResolution';
+import { redirect } from 'next/navigation';
 
 interface GenerateMultiImageOptions {
   prompt: string;
@@ -69,7 +70,7 @@ export function useMultiImageGeneration(): UseMultiImageGenerationReturn {
   }, [generationIds, allStatuses]);
 
   const generate = async ({ prompt, numberOfImages = 1, settings }: GenerateMultiImageOptions) => {
-    const batchSize = 3;
+    const batchSize = 1;
     const newIds: string[] = [];
     const actualNumberOfImages = Math.min(numberOfImages, MAX_GENERATIONS);
     const baseSeed = settings?.seed ?? 0;
@@ -98,10 +99,15 @@ export function useMultiImageGeneration(): UseMultiImageGenerationReturn {
           }).then(async response => {
             if (response.status === 403) {
               throw new Error('INSUFFICIENT_POINTS');
+
+            }
+            else if (response.status==410){
+              throw new Error('LOGIN REQUIRED');
             }
             if (!response.ok) {
               throw new Error('Failed to generate image');
             }
+            
             return response.json();
           })
         }

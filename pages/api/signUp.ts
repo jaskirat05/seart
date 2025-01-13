@@ -105,6 +105,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           .from('anonymous_sessions')
           .update({
             status: 'converted',
+            points_remaining: 0,
             converted_user_id: clerkUserId, // Store Clerk's user ID here
           })
           .eq('id', session.id);

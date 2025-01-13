@@ -1,4 +1,3 @@
-
 import { clerkClient, clerkMiddleware, createRouteMatcher} from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
@@ -10,7 +9,7 @@ import { useState } from "react";
 import { cookies } from 'next/headers'
 import { q } from "framer-motion/client";
 
-const publicRoutes = createRouteMatcher(["/", "/api/webhook", "/api/upload","api/signUp","/login"]);
+const publicRoutes = createRouteMatcher(["/", "/api/webhook", "/api/upload","api/signUp","/login","/history", "/api/history","/settings"]);
 const webhookRoutes = createRouteMatcher(["/api/webhook","/api/signUp"]);
 
 export default clerkMiddleware(async (auth, req) => {  
@@ -78,6 +77,7 @@ export default clerkMiddleware(async (auth, req) => {
                   httpOnly: true,
                   path: '/',
                 })
+                
             }
             
             if (!sessionCache) {
