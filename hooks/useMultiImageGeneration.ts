@@ -5,6 +5,7 @@ import { ImageResolutions } from '@/types/imageResolution';
 import { redirect } from 'next/navigation';
 
 interface GenerateMultiImageOptions {
+  batch_ID?:string;
   prompt: string;
   numberOfImages?: number;
   settings?: Partial<ModelSettings>;
@@ -69,7 +70,7 @@ export function useMultiImageGeneration(): UseMultiImageGenerationReturn {
     });
   }, [generationIds, allStatuses]);
 
-  const generate = async ({ prompt, numberOfImages = 1, settings }: GenerateMultiImageOptions) => {
+  const generate = async ({ prompt, numberOfImages = 1, settings,batch_ID }: GenerateMultiImageOptions) => {
     const batchSize = 1;
     const newIds: string[] = [];
     const actualNumberOfImages = Math.min(numberOfImages, MAX_GENERATIONS);
@@ -93,8 +94,10 @@ export function useMultiImageGeneration(): UseMultiImageGenerationReturn {
                 ...settings,
                 seed: nextSeed,
                 prompt,
-                nImages: Number(1)  // Keep the nImages setting from page.tsx
-              }
+                nImages: Number(1),
+                  // Keep the nImages setting from page.tsx
+              },
+              batchId:batch_ID
             })
           }).then(async response => {
             if (response.status === 403) {

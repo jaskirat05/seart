@@ -1,26 +1,81 @@
 "use client"
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useUser } from '@clerk/nextjs';
 import Header from '../components/Header';
 import { useMultiImageGeneration } from '@/hooks/useMultiImageGeneration';
 import { ImageResolution, ImageResolutions } from '@/types/imageResolution';
 import { toast } from 'sonner';
+import GallerySection from '../components/GallerySection';
+import { useInfiniteQuery } from '@tanstack/react-query';
+import { ImageGeneration } from '@/types/database';
+import { useInView } from 'react-intersection-observer';
+import { UUID } from 'crypto';
+
+interface FetchResponse {
+  data: ImageGeneration[];
+  totalCount: number;
+  hasMore: boolean;
+}
 
 const Settings = () => {
   const { user } = useUser();
   const [model, setModel] = useState('flux');
+  const [batchId,setBatchId] = useState<string|null>(null);
   const [prompt, setPrompt] = useState('');
   const [imgResolution, setResolution] = useState<ImageResolution>(ImageResolutions.FLUXSQUARE);
   const [seed, setSeed] = useState(0);
   const [noOfImages, setNoOfImages] = useState(1);
 
   const { generate, generations, isAnyLoading } = useMultiImageGeneration();
+  const { ref, inView } = useInView();
+
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    status,
+  } = useInfiniteQuery({
+    queryKey: ['settings-generations'],
+    queryFn: async ({ pageParam = 1 }) => {
+      console.log('Fetching page:', pageParam); // Debug log
+      const response = await fetch(`/api/history?page=${pageParam}`);
+      if (!response.ok) {
+        throw new Error('Failed to fetch generations');
+      }
+      const data = await response.json();
+      console.log('Response data:', data); // Debug log
+      return data;
+    },
+    getNextPageParam: (lastPage, allPages) => {
+      console.log('getNextPageParam called with:', { lastPage, allPages }); // Debug log
+      if (!lastPage.hasMore) return undefined;
+      return allPages.length + 1;
+    },
+    initialPageParam: 1,
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
+  });
+
+  useEffect(() => {
+    console.log('inView:', inView, 'hasNextPage:', hasNextPage, 'isFetchingNextPage:', isFetchingNextPage); // Debug log
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      console.log('Triggering fetchNextPage'); // Debug log
+      fetchNextPage();
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage]);
+
+  const generationsData = data?.pages.flatMap(page => page.data) || [];
+  const combinedGenerations = [...(generations || []), ...generationsData];
 
   const handleResolutionChange = (resolution: ImageResolution) => {
     setResolution(resolution);
   }
 
   const handleGenerate = async () => {
+    const newBatchId = crypto.randomUUID();
+    setBatchId(newBatchId);
+
     if (!prompt.trim()) {
       toast.error('Please enter a prompt');
       return;
@@ -37,7 +92,8 @@ const Settings = () => {
           model: model,
           nImages: Number(1),
           
-        }
+        },
+        batch_ID: newBatchId
       });
     } catch (error: any) {
       if (error.message === 'INSUFFICIENT_POINTS') {
@@ -53,14 +109,12 @@ const Settings = () => {
   };
 
   return (
-    <div className="min-h-screen bg-white">
-     
-      
-      {/* Main Content */}
-      <main className="pt-[60px] px-4 sm:px-8 md:px-16 lg:px-[120px]">
-        <div className="flex flex-col-reverse lg:flex-row gap-8 py-6">
-          {/* Left Sidebar - Settings */}
-          <div className="w-full lg:w-[400px] lg:flex-shrink-0">
+    <div className="min-h-screen bg-white py-24">
+      <div className="w-full px-4 mx-auto">
+        {/* Main Settings Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column - Settings Form */}
+          <div>
             {/* Model Settings */}
             <div className="bg-white rounded-xl p-6 shadow-sm">
               {/* Model Version */}
@@ -164,8 +218,8 @@ const Settings = () => {
             </div>
           </div>
 
-          {/* Right Content Area */}
-          <div className="flex-1">
+          {/* Right Column - Generated Images */}
+          <div>
             {/* Text Input and Generate Button */}
             <div className="relative">
               {/* Glowing border effect */}
@@ -197,7 +251,13 @@ const Settings = () => {
                   {generations.map((gen) => (
                     <div 
                       key={gen.id}
-                      className="aspect-square bg-gray-50 rounded-lg flex items-center justify-center relative overflow-hidden"
+                      className={`bg-gray-50 rounded-lg flex items-center justify-center relative overflow-hidden ${
+                        imgResolution === ImageResolutions.SQUARE || imgResolution === ImageResolutions.FLUXSQUARE
+                          ? 'aspect-square'
+                          : imgResolution === ImageResolutions.LANDSCAPE || imgResolution === ImageResolutions.FLUXLANDSCAPE
+                          ? 'aspect-[16/9]'
+                          : 'aspect-[9/16]'
+                      }`}
                     >
                       {gen.isLoading && (
                         <div className="absolute inset-0 flex items-center justify-center bg-gray-50">
@@ -222,7 +282,13 @@ const Settings = () => {
                   {Array.from({ length: noOfImages }).map((_, i) => (
                     <div 
                       key={i}
-                      className="aspect-square bg-gray-50 rounded-lg flex items-center justify-center"
+                      className={`bg-gray-50 rounded-lg flex items-center justify-center ${
+                        imgResolution === ImageResolutions.SQUARE || imgResolution === ImageResolutions.FLUXSQUARE
+                          ? 'aspect-square'
+                          : imgResolution === ImageResolutions.LANDSCAPE || imgResolution === ImageResolutions.FLUXLANDSCAPE
+                          ? 'aspect-[16/9]'
+                          : 'aspect-[9/16]'
+                      }`}
                     >
                       <span className="material-symbols-outlined text-gray-200" style={{ fontSize: '120px' }}>
                         image
@@ -234,7 +300,24 @@ const Settings = () => {
             </div>
           </div>
         </div>
-      </main>
+
+        {/* Full Width Gallery Section */}
+        <div className="p-6 rounded-lg shadow">
+          <h2 className="text-xl font-semibold mb-6">Recent Generations</h2>
+          <GallerySection generations={combinedGenerations} />
+          {hasNextPage && (
+            <div 
+              ref={ref}
+              className="h-20 flex items-center justify-center mt-8"
+            >
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-indigo-600 border-t-transparent"></div>
+            </div>
+          )}
+          {!hasNextPage && combinedGenerations.length > 0 && (
+            <p className="text-center text-gray-500 mt-8">No more images to load</p>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

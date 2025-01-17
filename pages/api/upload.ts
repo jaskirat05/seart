@@ -92,7 +92,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.log('Session ID in upload:', sessionId);
     }
 
-    const { prompt, settings } = req.body;
+    const { prompt, settings,batchId } = req.body;
     if (!prompt) {
       return res.status(400).json({ error: 'Prompt is required' });
     }
@@ -130,7 +130,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       prompt: prompt,
       favorite: false,
       model_settings: workflow,
-      tags:[]
+      tags:[],
+      batch_id: batchId,
     };
 
     console.log('Creating generation:', generation);

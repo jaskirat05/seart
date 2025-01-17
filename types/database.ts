@@ -29,6 +29,7 @@ export interface ImageGeneration {
   created_at: string;
   updated_at: string;
   error_message: string | null;
+  batch_id: string | null;
 }
 
 export type CreateImageGeneration = Omit<

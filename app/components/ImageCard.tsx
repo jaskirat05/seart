@@ -1,40 +1,54 @@
-"use client";
+"use client"
 
-import { useState } from 'react';
-import Image from 'next/image';
 import { ImageGeneration } from '@/types/database';
-import { MdDownload, MdZoomOutMap } from 'react-icons/md';
+import { MdDownload } from 'react-icons/md';
 import { toast } from 'sonner';
+import Image from 'next/image';
+import { motion } from 'framer-motion';
+import { useState } from 'react';
+import Sparkles from 'react-sparkle';
 
 interface ImageCardProps {
-  generation: ImageGeneration;
+  generations: ImageGeneration[];
 }
 
-export default function ImageCard({ generation }: ImageCardProps) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [showHoverInfo, setShowHoverInfo] = useState(false);
+const ImageCard = ({ generations }: ImageCardProps) => {
   const [isDownloading, setIsDownloading] = useState(false);
+  const mainGeneration = generations[0]; // Use first generation for metadata
 
-  const handleDownload = async () => {
-    if (!generation.image_url) {
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const handleDownload = async (imageUrl: string) => {
+    if (!imageUrl) {
       toast.error('Image URL is not available');
       return;
     }
 
     setIsDownloading(true);
     try {
-      // Use our proxy API endpoint
-      const response = await fetch(`/api/download?url=${encodeURIComponent(generation.image_url)}`);
-      
+      const proxyUrl = `/api/download?url=${encodeURIComponent(imageUrl)}`;
+      console.log('Downloading through proxy:', proxyUrl);
+
+      const response = await fetch(proxyUrl);
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `seart-${generation.id}.png`;
+      const filename = imageUrl.split('/').pop() || 'generated-image.png';
+      a.download = filename;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -42,135 +56,92 @@ export default function ImageCard({ generation }: ImageCardProps) {
       toast.success('Image downloaded successfully');
     } catch (error) {
       console.error('Error downloading image:', error);
-      toast.error('Failed to download image. Please try again.');
+      toast.error(error instanceof Error ? error.message : 'Failed to download image');
     } finally {
       setIsDownloading(false);
     }
   };
 
   return (
-    <>
-      <div 
-        className="relative aspect-square bg-zinc-900 rounded-lg overflow-hidden group"
-        onMouseEnter={() => setShowHoverInfo(true)}
-        onMouseLeave={() => setShowHoverInfo(false)}
-      >
-        {generation.image_url && (
-          <div className="relative aspect-square w-full h-full flex items-center justify-center">
-            <Image
-              src={generation.image_url||'Pending'}
-              alt={generation.prompt}
-              fill
-              className="object-cover transition-transform group-hover:scale-105"
-              sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+    <div className="flex flex-col gap-4">
+      {/* Header with Prompt and Model Info */}
+      <div className="flex flex-col md:flex-row md:items-center gap-4">
+        {/* Prompt with Sparkles */}
+        <div className="relative flex-1">
+          <p className="text-md font-extralight italic font-fredoka text-gray-900">
+            {mainGeneration.prompt}
+          </p>
+          <div className="absolute inset-0 pointer-events-none">
+            <Sparkles
+              color="#FF9933"
+              count={25}
+              minSize={7}
+              maxSize={10}
+              fadeOutSpeed={10}
+              flicker={false}
             />
           </div>
-        )}
-        
-        {/* Hover overlay */}
-        <div 
-          className={`absolute inset-0 bg-black/80 transition-opacity flex flex-col justify-between p-4
-            ${showHoverInfo ? 'opacity-100' : 'opacity-0'}`}
-        >
-          <div className="flex flex-wrap gap-2">
-            <div className="flex items-center rounded-full border border-white/20 bg-zinc-900 overflow-hidden">
-              <span className="bg-[#DE3C4B] text-white px-3 py-1 text-sm">Model</span>
-              <span className="text-white px-3 py-1 text-sm">{generation.model_settings?.model || 'NA'}</span>
-            </div>
-            <div className="flex items-center rounded-full border border-white/20 bg-zinc-900 overflow-hidden">
-              <span className="bg-[#DE3C4B] text-white px-3 py-1 text-sm">Size</span>
-              <span className="text-white px-3 py-1 text-sm">{generation.model_settings?.width}x{generation.model_settings?.height}</span>
-            </div>
-            <div className="flex items-center rounded-full border border-white/20 bg-zinc-900 overflow-hidden">
-              <span className="bg-[#DE3C4B] text-white px-3 py-1 text-sm">Seed</span>
-              <span className="text-white px-3 py-1 text-sm">{generation.model_settings?.seed || 'NA'}</span>
-            </div>
-          </div>
-          
-          <button
-            onClick={() => setIsModalOpen(true)}
-            className="w-full bg-[#DE3C4B] text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2 hover:bg-[#DE3C4B]/90 transition-colors"
-          >
-            <MdZoomOutMap className="text-xl" />
-            <span>Enlarge</span>
-          </button>
+        </div>
+
+        {/* Model Name and Date */}
+        <div className="flex-shrink-0 flex flex-col md:flex-row gap-2 md:gap-4">
+          <span className="bg-red-700 border-red-700/50 border-b-2 text-white px-3 py-1 rounded-full text-sm font-medium whitespace-nowrap uppercase w-fit">
+            {mainGeneration.model_settings?.model || 'NA'}
+          </span>
+          <span className="text-black px-3 py-1 text-sm font-medium whitespace-nowrap uppercase w-fit">
+            {formatDate(mainGeneration.created_at || 'NA')}
+          </span>
         </div>
       </div>
 
-      {/* Modal */}
-      {isModalOpen && (
-        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 overflow-y-auto">
-          <div className="relative w-full max-w-7xl">
-            {/* Close button */}
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="absolute -top-12 right-0 text-white hover:text-gray-300 md:text-3xl text-2xl p-2"
-            >
-              ×
-            </button>
-
-            <div className="flex flex-col md:flex-row gap-6">
-              {/* Image container */}
-              <div className="relative md:h-[80vh] h-[50vh] w-full md:w-auto md:flex-shrink-0">
+      {/* Images Row/Column */}
+      <div className="flex flex-col md:flex-row gap-4">
+        {generations.map((gen) => (
+          <div key={gen.id} className="relative group w-fit">
+            {gen.image_url && (
+              <>
                 <Image
-                  src={generation.image_url||'Pending'}
-                  alt={generation.prompt}
-                  fill
-                  className="object-contain"
-                  sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 1280px"
+                  src={gen.image_url}
+                  alt={gen.prompt || 'Generated image'}
+                  width={400}
+                  height={400}
+                  className="rounded-lg h-auto max-h-[70vh] object-contain"
                 />
-              </div>
-
-              {/* Info container */}
-              <div className="flex-1 text-white flex flex-col">
-                <div className="mb-4 md:mb-8">
-                  <p className="text-2xl md:text-4xl font-bold mb-4 md:mb-6 leading-tight font-fredoka">
-                    {generation.prompt}
-                  </p>
-                  <p className="text-sm text-gray-300">
-                    {new Date(generation.created_at).toLocaleString()}
-                  </p>
-                </div>
-
-                <div className="flex flex-wrap gap-2 md:gap-3 mb-4 md:mb-8">
-                  <div className="flex items-center rounded-full border border-white/20 bg-zinc-900 overflow-hidden">
-                    <span className="bg-[#DE3C4B] text-white px-2 md:px-3 py-1 text-xs md:text-sm">Model</span>
-                    <span className="text-white px-2 md:px-3 py-1 text-xs md:text-sm">{generation.model_settings?.model || 'NA'}</span>
+                
+                {/* Hover Overlay */}
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex flex-col justify-between p-4">
+                  <div className="flex justify-between items-start text-white">
+                    <span className="text-sm bg-[#FFA41D] border-[#FFA41D]/50 border-b-2 text-white px-3 py-1 rounded-full">
+                      Seed: {gen.model_settings?.seed || 'NA'}
+                    </span>
+                    <span className="text-sm bg-purple-800 border-purple-800/50 border-b-2 text-white px-3 py-1 rounded-full">
+                      {gen.model_settings?.width}x{gen.model_settings?.height}
+                    </span>
                   </div>
-                  <div className="flex items-center rounded-full border border-white/20 bg-zinc-900 overflow-hidden">
-                    <span className="bg-[#DE3C4B] text-white px-2 md:px-3 py-1 text-xs md:text-sm">Size</span>
-                    <span className="text-white px-2 md:px-3 py-1 text-xs md:text-sm">{generation.model_settings?.width}x{generation.model_settings?.height}</span>
-                  </div>
-                  <div className="flex items-center rounded-full border border-white/20 bg-zinc-900 overflow-hidden">
-                    <span className="bg-[#DE3C4B] text-white px-2 md:px-3 py-1 text-xs md:text-sm">Seed</span>
-                    <span className="text-white px-2 md:px-3 py-1 text-xs md:text-sm">{generation.model_settings?.seed || 'NA'}</span>
+                  
+                  <div className="flex justify-end">
+                    <motion.button
+                      onClick={() => handleDownload(gen.image_url!)}
+                      disabled={isDownloading}
+                      className="p-2 rounded-full bg-[#FF9933] text-white hover:bg-[#E68A2E] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      {isDownloading ? (
+                        <div className="animate-spin rounded-full h-5 w-5 border-2 border-white border-t-transparent" />
+                      ) : (
+                        <MdDownload className="text-xl" />
+                      )}
+                    </motion.button>
                   </div>
                 </div>
-
-                <div className="mt-auto justify-center">
-                  <button
-                    onClick={handleDownload}
-                    disabled={isDownloading}
-                    className="w-full bg-[#DE3C4B] text-white py-2 md:py-3 px-4 md:px-6 rounded-lg flex items-center justify-center gap-2 hover:bg-[#DE3C4B]/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm md:text-base"
-                  >
-                    {isDownloading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 md:h-5 w-4 md:w-5 border-2 border-white border-t-transparent" />
-                        <span>Downloading...</span>
-                      </>
-                    ) : (
-                      <>
-                        <MdDownload className="text-lg md:text-xl" />
-                        <span>Download</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-              </div>
-            </div>
+              </>
+            )}
           </div>
-        </div>
-      )}
-    </>
+        ))}
+      </div>
+    </div>
   );
-}
+};
+
+export default ImageCard;
