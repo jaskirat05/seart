@@ -19,7 +19,6 @@
     "react-dom": "^19.0.0",
     "react-icons": "^5.4.0",
     "react-intersection-observer": "^9.14.1",
-    "react-sparkle": "^2.0.0",
     "sonner": "^1.7.1",
     "svix": "^1.45.1"
   },

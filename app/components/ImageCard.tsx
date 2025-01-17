@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useState } from 'react';
-import Sparkles from 'react-sparkle';
+
 
 interface ImageCardProps {
   generations: ImageGeneration[];
@@ -66,21 +66,11 @@ const ImageCard = ({ generations }: ImageCardProps) => {
     <div className="flex flex-col gap-4">
       {/* Header with Prompt and Model Info */}
       <div className="flex flex-col md:flex-row md:items-center gap-4">
-        {/* Prompt with Sparkles */}
+        {/* Prompt with Glow Effect */}
         <div className="relative flex-1">
-          <p className="text-md font-extralight italic font-fredoka text-gray-900">
+          <p className="text-md font-extralight italic font-fredoka text-gray-900 glow-text">
             {mainGeneration.prompt}
           </p>
-          <div className="absolute inset-0 pointer-events-none">
-            <Sparkles
-              color="#FF9933"
-              count={25}
-              minSize={7}
-              maxSize={10}
-              fadeOutSpeed={10}
-              flicker={false}
-            />
-          </div>
         </div>
 
         {/* Model Name and Date */}
@@ -140,6 +130,25 @@ const ImageCard = ({ generations }: ImageCardProps) => {
           </div>
         ))}
       </div>
+      <style jsx>{`
+        .glow-text {
+          position: relative;
+          text-shadow: 0 0 8px rgba(255, 153, 51, 0.2),
+                       0 0 16px rgba(255, 153, 51, 0.1);
+          animation: glow 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+          from {
+            text-shadow: 0 0 8px rgba(255, 153, 51, 0.2),
+                         0 0 16px rgba(255, 153, 51, 0.1);
+          }
+          to {
+            text-shadow: 0 0 12px rgba(255, 153, 51, 0.3),
+                         0 0 24px rgba(255, 153, 51, 0.15);
+          }
+        }
+      `}</style>
     </div>
   );
 };
