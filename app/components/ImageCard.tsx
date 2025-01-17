@@ -14,7 +14,7 @@ interface ImageCardProps {
 
 const ImageCard = ({ generations }: ImageCardProps) => {
   const [isDownloading, setIsDownloading] = useState(false);
-  const mainGeneration = generations[0]; // Use first generation for metadata
+  const mainGeneration = generations[0]; // Use first generation for metadata, this is a change
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
