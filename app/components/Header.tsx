@@ -4,6 +4,9 @@ import Drawer from './Drawer';
 import { SignInButton, SignUpButton, UserButton, useUser } from '@clerk/nextjs';
 import { usePoints } from '@/hooks/usePoints';
 import { IoLeaf } from "react-icons/io5";
+import { useRouter } from 'next/router';
+import { redirect } from 'next/navigation';
+import Link from 'next/link';
 
 interface HeaderProps {
   sessionId?: string | null;
@@ -34,9 +37,9 @@ const Header = ({ sessionId, userId }: HeaderProps) => {
               <span className="material-symbols-outlined text-black">
                 animated_images
               </span>
-              <span className="ml-2 text-lg font-bold text-black hidden md:inline">
+              <Link href="/" className="ml-2 text-lg font-bold text-black hover:opacity-80 transition-opacity hidden md:inline">
                 Hell&apos;s kitchen
-              </span>
+              </Link>
             </div>
           </div>
 
@@ -46,6 +49,14 @@ const Header = ({ sessionId, userId }: HeaderProps) => {
             <span className="text-lg font-medium">
               {loading ? "..." : points}
             </span>
+            <span>
+              <button className="ml-2 px-4 py-2 rounded-lg text-white bg-[#FFA41D] hover:bg-opacity-80 hover:text-white/80 transition-colors" onClick={()=>redirect('/pricing')}>
+                
+                  recharge
+                
+              </button>
+              </span>
+            
           </div>
 
           {/* Desktop Navigation */}
@@ -76,9 +87,11 @@ const Header = ({ sessionId, userId }: HeaderProps) => {
                 <span className="material-symbols-outlined text-black text-2xl">
                   animated_images
                 </span>
-                <span className="ml-2 text-xl font-bold text-black">
+                
+                <Link href="/" className="ml-2 text-xl font-bold text-black hover:opacity-80 transition-opacity">
                   Hell&apos;s kitchen
-                </span>
+                </Link>
+                
               </div>
 
               {/* Points Display in Drawer */}
