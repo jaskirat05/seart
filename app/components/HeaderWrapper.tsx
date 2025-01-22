@@ -8,9 +8,9 @@ async function HeaderWrapper() {
   const userId=await auth();
   const sessionId = cookieStore.get('anon_session_id')?.value;
   
-  console.log('Session ID:', sessionId);
-
-  return <Header sessionId={sessionId} userId={userId?userId.userId:null}/>;
+  console.log('Session ID:Header Wrapper', sessionId);
+  console.log('User ID:Header Wrapper', userId?.userId??null);
+  return <Header sessionId={userId?null:sessionId} userId={userId?userId.userId:null}/>;
 }
 
 export default HeaderWrapper;

@@ -9,7 +9,7 @@ import { useState } from "react";
 import { cookies } from 'next/headers'
 import { q } from "framer-motion/client";
 
-const publicRoutes = createRouteMatcher(["/", "/api/webhook", "/api/upload","api/signUp","/login","/history", "/api/history","/settings"]);
+const publicRoutes = createRouteMatcher(["/", "/api/webhook", "/api/upload","api/signUp","/login","/history", "/api/history","/settings","/pricing"]);
 const webhookRoutes = createRouteMatcher(["/api/webhook","/api/signUp"]);
 
 export default clerkMiddleware(async (auth, req) => {  
@@ -114,6 +114,7 @@ export default clerkMiddleware(async (auth, req) => {
 
     }
     else if (userId &&(await auth()).sessionClaims?.metadata?.role == 'user' && publicRoutes(req)) {
+      console.log("setting user role, authorized")
         return response;
 
     }

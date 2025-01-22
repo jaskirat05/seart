@@ -23,6 +23,7 @@ const PricingPage = () => {
       {
         name: 'Pro',
         price: 29,
+        savings: '15 days bonus for firts time users',
         features: [
           'Unlimited images',
           'All resolution options',
@@ -51,6 +52,7 @@ const PricingPage = () => {
       {
         name: 'Pro',
         price: 290,
+        
         features: [
           'Unlimited images',
           'All resolution options',

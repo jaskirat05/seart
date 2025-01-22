@@ -16,6 +16,8 @@ interface HeaderProps {
 const Header = ({ sessionId, userId }: HeaderProps) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const { isSignedIn } = useUser();
+  console.log("Hey I am the header",userId)
+  console.log(sessionId)
   const { points, loading } = usePoints({ userId: userId ? userId : undefined, sessionId: sessionId ? sessionId : undefined });
 
   return (
