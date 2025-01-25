@@ -112,8 +112,8 @@ const Settings = () => {
 
   return (
     <div className="flex flex-col lg:flex-row h-screen">
-      {/* Settings Panel - Full width on mobile, 1/4 width on desktop */}
-      <div className="w-full lg:w-1/4 bg-white p-6 mt-24 border-b lg:border-b-0 lg:border-r border-gray-200 lg:h-screen lg:fixed lg:left-0 lg:overflow-y-auto">
+      {/* Settings Panel - Full width on mobile, 18% width on desktop */}
+      <div className="w-full lg:w-[18%] bg-white p-5 mt-24 border-b lg:border-b-0 lg:border-r border-gray-200 lg:h-screen lg:fixed lg:left-0 lg:overflow-y-auto">
         {/* Model Settings */}
         <div className="bg-white rounded-xl p-6 shadow-sm">
           {/* Model Version */}
@@ -217,8 +217,8 @@ const Settings = () => {
         </div>
       </div>
 
-      {/* Main Content Area - Full width on mobile, 3/4 width on desktop */}
-      <div className="w-full lg:w-3/4 lg:ml-[25%] flex flex-col mt-24">
+      {/* Main Content Area - Full width on mobile, 82% width on desktop */}
+      <div className="w-full lg:w-[82%] lg:ml-[18%] flex flex-col mt-24">
         {/* Generation Input Area */}
         <div className="p-6">
           <div className="relative">

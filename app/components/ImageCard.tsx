@@ -85,7 +85,7 @@ const ImageCard = ({ generations }: ImageCardProps) => {
       </div>
 
       {/* Images Row/Column */}
-      <div className="flex flex-col md:flex-row gap-4 md:overflow-x-auto md:pb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {generations.map((gen) => {
           // Determine aspect ratio based on model settings
           const aspectRatioClass = gen.model_settings?.width && gen.model_settings?.height
@@ -97,20 +97,16 @@ const ImageCard = ({ generations }: ImageCardProps) => {
             : 'aspect-square';
 
           return (
-            <div key={gen.id} className="relative group w-fit flex-shrink-0">
+            <div key={gen.id} className="relative group w-full max-w-[300px] mx-auto">
               {(!gen.image_url || gen.status === 'pending') ? (
-                <div className={`w-[280px] md:w-[400px] ${aspectRatioClass} rounded-lg bg-gray-50 flex items-center justify-center`}>
+                <div className={`w-full max-w-[300px] ${aspectRatioClass} rounded-lg bg-gray-50 flex items-center justify-center`}>
                   <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FFA41D]"></div>
                 </div>
               ) : (
                 <>
-                  <Image
-                    src={gen.image_url}
-                    alt={gen.prompt || 'Generated image'}
-                    width={400}
-                    height={400}
-                    className={`rounded-lg h-auto max-h-[70vh] object-contain w-[280px] md:w-[400px] ${aspectRatioClass}`}
-                  />
+                  <div className={`relative ${aspectRatioClass} rounded-lg overflow-hidden bg-gray-50`}>
+                    <Image src={gen.image_url} alt={gen.prompt || 'Generated image'} fill className="object-cover w-full h-full" />
+                  </div>
                   
                   {/* Hover Overlay */}
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex flex-col justify-between p-4">
