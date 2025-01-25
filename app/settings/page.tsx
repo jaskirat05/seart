@@ -243,28 +243,6 @@ const Settings = () => {
               </button>
             </div>
           </div>
-
-          {/* Current Generations Display */}
-          <div className="mt-6 bg-white rounded-xl p-6 shadow-sm min-h-[400px]">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {Array.from({ length: noOfImages }).map((_, i) => (
-                <div 
-                  key={i}
-                  className={`bg-gray-50 rounded-lg flex items-center justify-center ${
-                    imgResolution === ImageResolutions.SQUARE || imgResolution === ImageResolutions.FLUXSQUARE
-                      ? 'aspect-square'
-                      : imgResolution === ImageResolutions.LANDSCAPE || imgResolution === ImageResolutions.FLUXLANDSCAPE
-                      ? 'aspect-[16/9]'
-                      : 'aspect-[9/16]'
-                  }`}
-                >
-                  <span className="material-symbols-outlined text-gray-200" style={{ fontSize: '120px' }}>
-                    image
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
 
         {/* Recent Generations Section */}

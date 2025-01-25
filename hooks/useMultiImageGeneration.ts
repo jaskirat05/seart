@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useGenerationStatus, GenerationStatus } from './useGenerationStatus';
 import { ModelSettings } from '@/types/database';
 import { ImageResolutions } from '@/types/imageResolution';
+import { useQueryClient } from '@tanstack/react-query';
 import { redirect } from 'next/navigation';
 
 interface GenerateMultiImageOptions {
@@ -28,29 +29,42 @@ const MAX_GENERATIONS = 4;
 
 export function useMultiImageGeneration(): UseMultiImageGenerationReturn {
   const [generationIds, setGenerationIds] = useState<string[]>([]);
+  const queryClient = useQueryClient();
 
   // Create separate status states for each possible generation
   const status1 = useGenerationStatus({
     generationId: generationIds[0],
-    onComplete: (url) => console.log('Generation 1 complete:', url),
+    onComplete: async (url) => {
+      console.log('Generation 1 complete:', url);
+      await queryClient.invalidateQueries({ queryKey: ['settings-generations'] });
+    },
     onError: () => console.error('Generation 1 failed')
   });
 
   const status2 = useGenerationStatus({
     generationId: generationIds[1],
-    onComplete: (url) => console.log('Generation 2 complete:', url),
+    onComplete: async (url) => {
+      console.log('Generation 2 complete:', url);
+      await queryClient.invalidateQueries({ queryKey: ['settings-generations'] });
+    },
     onError: () => console.error('Generation 2 failed')
   });
 
   const status3 = useGenerationStatus({
     generationId: generationIds[2],
-    onComplete: (url) => console.log('Generation 3 complete:', url),
+    onComplete: async (url) => {
+      console.log('Generation 3 complete:', url);
+      await queryClient.invalidateQueries({ queryKey: ['settings-generations'] });
+    },
     onError: () => console.error('Generation 3 failed')
   });
 
   const status4 = useGenerationStatus({
     generationId: generationIds[3],
-    onComplete: (url) => console.log('Generation 4 complete:', url),
+    onComplete: async (url) => {
+      console.log('Generation 4 complete:', url);
+      await queryClient.invalidateQueries({ queryKey: ['settings-generations'] });
+    },
     onError: () => console.error('Generation 4 failed')
   });
 
