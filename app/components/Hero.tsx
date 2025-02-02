@@ -61,7 +61,8 @@ const Hero = () => {
           width: resolution.width,
           prompt: prompt.trim(),
           seed:seed,
-          nImages:1
+          nImages:1,
+          model:"flux"
         }
       };
       console.log('Request body:', requestBody);
