@@ -22,6 +22,7 @@ const Hero = () => {
     // Generate a random number between 1 and 2^32 - 1 (max positive 32-bit integer)
     const seed=Math.floor(Math.random() * 2147483647) + 1;
     setSeed(seed);
+    handleGenerate();
     //return seed;
 
   };
@@ -90,7 +91,8 @@ const Hero = () => {
       }
 
       toast.success('Generation started! Your image will be ready soon.');
-      setPrompt(''); // Clear prompt after successful submission
+      //setPrompt(''); // Clear prompt after successful submission
+      setSeed(Math.floor(Math.random() * 2147483647) + 1);
       
       if (data.generationId) {
         console.log('Setting generationId:', data.generationId);
@@ -121,7 +123,7 @@ const Hero = () => {
         {user ? (
           <>Welcome back! You have unlimited generations.</>
         ) : (
-          <>Type in what you imagine, sign up for unlimited generations</>
+          <>Type in what you imagine, sign up for bonus points</>
         )}
       </h2>
 
