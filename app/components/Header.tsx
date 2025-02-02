@@ -1,11 +1,10 @@
 "use client"
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Drawer from './Drawer';
 import { SignInButton, SignUpButton, UserButton, useUser } from '@clerk/nextjs';
 import { usePoints } from '@/hooks/usePoints';
 import { IoLeaf } from "react-icons/io5";
 import { useRouter } from 'next/router';
-import { redirect } from 'next/navigation';
 import Link from 'next/link';
 
 interface HeaderProps {
@@ -15,10 +14,17 @@ interface HeaderProps {
 
 const Header = ({ sessionId, userId }: HeaderProps) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [showPointsWarning, setShowPointsWarning] = useState(false);
   const { isSignedIn } = useUser();
   console.log("Hey I am the header",userId)
   console.log(sessionId)
   const { points, loading } = usePoints({ userId: userId ? userId : undefined, sessionId: sessionId ? sessionId : undefined });
+
+  useEffect(() => {
+    if (!loading && points === 0) {
+      setShowPointsWarning(true);
+    }
+  }, [points, loading]);
 
   return (
     <header className="w-full bg-white shadow-[0_4px_20px_rgba(0,0,0,0.15)] fixed top-0 z-40">
@@ -52,13 +58,10 @@ const Header = ({ sessionId, userId }: HeaderProps) => {
               {loading ? "..." : points}
             </span>
             <span>
-              <button className="ml-2 px-4 py-2 rounded-lg text-white bg-[#FFA41D] hover:bg-opacity-80 hover:text-white/80 transition-colors" onClick={()=>redirect('/pricing')}>
-                
-                  recharge
-                
-              </button>
-              </span>
-            
+              <Link href="/pricing" className="ml-2 px-4 py-2 rounded-lg text-white bg-[#FFA41D] hover:bg-opacity-80 hover:text-white/80 transition-colors">
+                recharge
+              </Link>
+            </span>
           </div>
 
           {/* Desktop Navigation */}
@@ -127,6 +130,33 @@ const Header = ({ sessionId, userId }: HeaderProps) => {
           </Drawer>
         </div>
       </div>
+
+      {/* Points Warning Modal */}
+      {showPointsWarning && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
+            <h3 className="text-lg font-medium mb-2">No Points Available</h3>
+            <p className="text-gray-600 mb-4">
+              You exhausted your energy, but good news! We have exclusive discounts for you
+            </p>
+            <div className="flex justify-end space-x-3">
+              <button
+                onClick={() => setShowPointsWarning(false)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+              >
+                Close
+              </button>
+              <Link
+                href="/pricing"
+                className="px-4 py-2 bg-[#FFA41D] text-white rounded-lg hover:bg-opacity-80"
+                onClick={() => setShowPointsWarning(false)}
+              >
+                Get More Points
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </header>
   );
 };

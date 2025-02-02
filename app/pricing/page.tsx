@@ -22,15 +22,13 @@ const PricingPage = () => {
       },
       {
         name: 'Pro',
-        price: 29,
-        savings: '15 days bonus for firts time users',
+        price: 10,
+        savings: '5000 extra energy for first month',
         features: [
-          'Unlimited images',
+          '10,000 energy per month',
           'All resolution options',
-          'Priority support',
-          'Advanced features',
-          'API access',
-          'Custom branding'
+          'Acess to latest models',
+          'No watermark',
         ],
         buttonText: 'Upgrade to Pro',
         isPopular: true
@@ -43,23 +41,22 @@ const PricingPage = () => {
         features: [
           '50 images per month',
           'Basic resolution options',
-          'Standard support',
-          'Community access'
+          'Access to FLUX and Pony models',
+         
         ],
         buttonText: 'Get Started',
         isPopular: false
       },
       {
         name: 'Pro',
-        price: 290,
+        price: 60,
         
         features: [
-          'Unlimited images',
+          '10,000 energy per month for 12 months',
           'All resolution options',
-          'Priority support',
-          'Advanced features',
-          'API access',
-          'Custom branding'
+          'Acesss to latest models',
+          'Advanced image editing(Coming soon)',
+          'Custom branding(Coming soon)'
         ],
         buttonText: 'Upgrade to Pro',
         isPopular: true,
