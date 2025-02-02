@@ -58,14 +58,17 @@ const Header = ({ sessionId, userId }: HeaderProps) => {
               {loading ? "..." : points}
             </span>
             <span>
-              <Link href="/pricing" className="ml-2 px-4 py-2 rounded-lg text-white bg-[#FFA41D] hover:bg-opacity-80 hover:text-white/80 transition-colors">
+              <Link href="/pricing" className="px-4 py-2 rounded-lg text-white bg-[#FFA41D] hover:bg-opacity-80 hover:text-white/80 transition-colors">
                 recharge
               </Link>
             </span>
           </div>
 
           {/* Desktop Navigation */}
-          <div className="flex items-center justify-end space-x-8">
+          <div className="flex items-center justify-end space-x-4">
+            <Link href="/settings" className="px-4 py-2 rounded-lg text-white bg-[#FFA41D] hover:bg-opacity-80 hover:text-white/80 transition-colors">
+              Create
+            </Link>
             {isSignedIn ? (
               <UserButton />
             ) : (
