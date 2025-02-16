@@ -7,25 +7,35 @@ import { IoLeaf } from "react-icons/io5";
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import BonusPointsModal from './BonusPointsModal';
+import RecentGenerations from './RecentGenerations';
 
 interface HeaderProps {
   sessionId?: string | null;
   userId?: string | null;
+  points?: number;
+  loading?: boolean;
+  recentGenerations?: Array<{
+    id: string;
+    imageUrl: string;
+    prompt: string;
+    createdAt: string;
+  }>;
 }
 
-const Header = ({ sessionId, userId }: HeaderProps) => {
+const Header = ({ sessionId, userId, points = 0, loading = false, recentGenerations = [] }: HeaderProps) => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [showPointsWarning, setShowPointsWarning] = useState(false);
+  const [showBonusPointsModal, setShowBonusPointsModal] = useState(false);
   const { isSignedIn } = useUser();
   console.log("Hey I am the header",userId)
   console.log(sessionId)
-  const { points, loading, showBonusModal, setShowBonusModal } = usePoints({ userId: userId ? userId : undefined, sessionId: sessionId ? sessionId : undefined });
+  const { points: userPoints, loading: userLoading, showBonusModal, setShowBonusModal } = usePoints({ userId: userId ? userId : undefined, sessionId: sessionId ? sessionId : undefined });
 
   useEffect(() => {
-    if (!loading && points === 0) {
+    if (!userLoading && userPoints === 0) {
       setShowPointsWarning(true);
     }
-  }, [points, loading]);
+  }, [userPoints, userLoading]);
 
   return (
     <header className="w-full bg-white shadow-[0_4px_20px_rgba(0,0,0,0.15)] fixed top-0 z-40">
@@ -56,11 +66,11 @@ const Header = ({ sessionId, userId }: HeaderProps) => {
           <div className="hidden md:flex items-center justify-center space-x-2">
             <IoLeaf className="text-[#FFA41D] text-xl" />
             <span className="text-lg font-medium">
-              {loading ? "..." : points} 
+              {userLoading ? "..." : userPoints} 
             </span>
             <span>
               <Link href="/pricing" className="px-4 py-2 rounded-lg text-white bg-[#FFA41D] hover:bg-opacity-80 hover:text-white/80 transition-colors">
-                recharge
+                Upgrade
               </Link>
             </span>
           </div>
@@ -93,44 +103,71 @@ const Header = ({ sessionId, userId }: HeaderProps) => {
 
           {/* Mobile Drawer */}
           <Drawer isOpen={isDrawerOpen} onClose={() => setIsDrawerOpen(false)}>
-            <div className="flex flex-col items-center space-y-6">
-              {/* Website Name in Drawer */}
-              <div className="flex items-center mb-6">
-                <span className="material-symbols-outlined text-black text-2xl">
+            {/* Website Name in Drawer */}
+            <div className="p-6 bg-white border-b border-gray-100">
+              <div className="flex items-center">
+                <span className="material-symbols-outlined text-[#FFA41D] text-2xl">
                   animated_images
                 </span>
                 <Link href="/" className="ml-2 text-xl font-bold text-black hover:opacity-80 transition-opacity">
                   Hell&apos;s kitchen
                 </Link>
               </div>
+            </div>
 
-              {/* Points Display in Drawer */}
-              <div className="flex items-center space-x-2">
-                <IoLeaf className="text-[#FFA41D] text-xl" />
-                <span className="text-lg font-medium">
-                  {loading ? "..." : points}
-                </span>
+            {/* Points Display Container */}
+            <div className="mx-6 mt-6 mb-8 p-6 bg-[#FFA41D] rounded-3xl shadow-lg">
+              <div className="flex flex-col items-center">
+                <span className="text-white text-sm font-medium mb-2">Available Points</span>
+                <div className="flex items-center gap-2 mb-4">
+                  <span className="material-symbols-outlined text-green-400 text-3xl">
+                    stars
+                  </span>
+                  <span className="text-3xl font-bold text-green-400">
+                    {userLoading ? "..." : userPoints}
+                  </span>
+                </div>
+                <Link
+                  href="/pricing"
+                  onClick={() => setIsDrawerOpen(false)}
+                  className="w-full py-2.5 bg-white text-[#FFA41D] rounded-xl font-medium hover:bg-white/90 transition-all flex items-center justify-center gap-2"
+                >
+                  <span className="material-symbols-outlined text-sm">
+                    add_circle
+                  </span>
+                  Get More Points
+                </Link>
               </div>
+            </div>
 
-              {/* Recharge Button in Drawer */}
-              <Link 
-                href="/pricing" 
-                className="w-full px-4 py-2 rounded-lg text-white bg-[#FFA41D] hover:bg-opacity-80 text-center"
+            {/* Recent Generations */}
+            <RecentGenerations userId={userId || undefined} sessionId={sessionId || undefined} />
+
+            {/* Navigation Links */}
+            <div className="px-6 space-y-4 mb-6">
+              <Link
+                href="/settings"
+                className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-xl transition-colors"
                 onClick={() => setIsDrawerOpen(false)}
               >
-                Recharge
+                <span className="material-symbols-outlined">
+                  history
+                </span>
+                <span>History</span>
               </Link>
+            </div>
 
-              {/* Auth Buttons in Drawer */}
+            {/* Auth Buttons */}
+            <div className="px-6 pb-6">
               {isSignedIn ? (
-                <div className="mt-4">
+                <div className="flex justify-center">
                   <UserButton />
                 </div>
               ) : (
-                <div className="w-full space-y-4">
+                <div className="space-y-3">
                   <SignInButton mode="modal">
                     <button 
-                      className="w-full text-black hover:text-[#DE3C4B] transition-colors flex items-center justify-center text-lg py-2"
+                      className="w-full py-2.5 text-[#FFA41D] border-2 border-[#FFA41D] rounded-xl font-medium hover:bg-[#FFA41D]/5 transition-colors"
                       onClick={() => setIsDrawerOpen(false)}
                     >
                       Login
@@ -138,7 +175,7 @@ const Header = ({ sessionId, userId }: HeaderProps) => {
                   </SignInButton>
                   <SignUpButton mode="modal">
                     <button 
-                      className="w-full bg-[#FFA41D] text-white px-4 py-2 flex items-center justify-center text-lg rounded-lg hover:bg-opacity-90 transition-colors"
+                      className="w-full py-2.5 bg-[#FFA41D] text-white rounded-xl font-medium hover:bg-[#FF9100] transition-colors"
                       onClick={() => setIsDrawerOpen(false)}
                     >
                       Sign Up
@@ -180,8 +217,8 @@ const Header = ({ sessionId, userId }: HeaderProps) => {
 
       {/* Bonus Points Modal */}
       <BonusPointsModal 
-        isOpen={showBonusModal} 
-        onClose={() => setShowBonusModal(false)} 
+        isOpen={showBonusPointsModal} 
+        onClose={() => setShowBonusPointsModal(false)} 
       />
     </header>
   );

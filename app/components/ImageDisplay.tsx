@@ -121,7 +121,7 @@ const ImageDisplay = ({ imageUrl, isLoading, seed, onRefresh }: ImageDisplayProp
             </>
           ) : (
             <>
-              <span className="material-symbols-outlined text-4xl opacity-50 text-[#3E7CB1] mb-2 group-hover:opacity-100 transition-opacity">
+              <span className="material-symbols-outlined text-4xl opacity-50 text-green-500 mb-2 group-hover:opacity-100 transition-opacity">
                 download
               </span>
               <span className="text-[#666464] text-sm">Download</span>
