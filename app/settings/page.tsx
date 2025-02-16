@@ -111,116 +111,120 @@ const Settings = () => {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row h-screen">
-      {/* Settings Panel - Full width on mobile, 18% width on desktop */}
-      <div className="w-full lg:w-[18%] bg-white p-5 mt-24 border-b lg:border-b-0 lg:border-r border-gray-200 lg:h-screen lg:fixed lg:left-0 lg:overflow-y-auto">
-        {/* Model Settings */}
-        <div className="bg-white rounded-xl p-6 shadow-sm">
-          {/* Model Version */}
-          <div className="mb-6">
-            <h3 className="text-base font-medium text-gray-700">Model</h3>
-            <select
-              value={model}
-              onChange={
-                (e) => {
-                  setModel(e.target.value);
-                  handleResolutionChange(model === 'flux' ? ImageResolutions.FLUXSQUARE : ImageResolutions.SQUARE);
-                }
-              }
-              className="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-[#FFA41D] focus:border-[#FFA41D] rounded-md"
-            >
-              <option value="flux">Flux Dev</option>
-              <option value="pony">Pony Diffusion</option>
-            </select>
-          </div>
-
-          {/* Image Settings */}
-          <div className="mb-6">
-            <h3 className="text-base font-medium text-gray-700">Image Settings</h3>
-            <div className="mt-2 grid grid-cols-3 gap-2">
-              <button 
-                className={`aspect-square border rounded-md hover:bg-gray-50 focus:outline-none relative group overflow-hidden
-                  ${imgResolution === ImageResolutions.SQUARE || imgResolution === ImageResolutions.FLUXSQUARE
-                    ? 'border-[#FFA41D] shadow-[0_0_10px_rgba(255,164,29,0.3)]' 
-                    : 'border-gray-300'}`}
-                onClick={() => handleResolutionChange(model === 'flux' ? ImageResolutions.FLUXSQUARE : ImageResolutions.SQUARE)}
-              >
-                <div className={`absolute inset-2 rounded transition-colors
-                  ${imgResolution === ImageResolutions.SQUARE || imgResolution === ImageResolutions.FLUXSQUARE
-                    ? 'bg-[#FFA41D]/10' 
-                    : 'bg-gray-100 group-hover:bg-gray-200'}`}
-                ></div>
-                <span className="absolute inset-0 flex items-center justify-center text-sm font-medium text-gray-700">1:1</span>
-              </button>
-              <button 
-                className={`aspect-[9/5] border rounded-md hover:bg-gray-50 focus:outline-none relative group overflow-hidden
-                  ${imgResolution === ImageResolutions.LANDSCAPE ||imgResolution === ImageResolutions.FLUXLANDSCAPE
-                    ? 'border-[#FFA41D] shadow-[0_0_10px_rgba(255,164,29,0.3)]' 
-                    : 'border-gray-300'}`}
-                onClick={() => handleResolutionChange(model === 'flux' ? ImageResolutions.FLUXLANDSCAPE : ImageResolutions.LANDSCAPE)}
-              >
-                <div className={`absolute inset-2 rounded transition-colors
-                  ${imgResolution === ImageResolutions.LANDSCAPE || imgResolution === ImageResolutions.FLUXLANDSCAPE
-                    ? 'bg-[#FFA41D]/10' 
-                    : 'bg-gray-100 group-hover:bg-gray-200'}`}
-                ></div>
-                <span className="absolute inset-0 flex items-center justify-center text-sm font-medium text-gray-700">9:16</span>
-              </button>
-              <button 
-                className={`aspect-[9/16] border rounded-md hover:bg-gray-50 focus:outline-none relative group overflow-hidden
-                  ${imgResolution === ImageResolutions.PORTRAIT || imgResolution === ImageResolutions.FLUXPORTRAIT
-                    ? 'border-[#FFA41D] shadow-[0_0_10px_rgba(255,164,29,0.3)]' 
-                    : 'border-gray-300'}`}
-                onClick={() => handleResolutionChange(model === 'flux' ? ImageResolutions.FLUXPORTRAIT : ImageResolutions.PORTRAIT)}
-              >
-                <div className={`absolute inset-2 rounded transition-colors
-                  ${imgResolution === ImageResolutions.PORTRAIT || imgResolution === ImageResolutions.FLUXPORTRAIT
-                    ? 'bg-[#FFA41D]/10' 
-                    : 'bg-gray-100 group-hover:bg-gray-200'}`}
-                ></div>
-                <span className="absolute inset-0 flex items-center justify-center text-sm font-medium text-gray-700">9:16</span>
-              </button>
-            </div>
-          </div>
-
-          {/* Image Quantity */}
-          <div>
-            <h3 className="text-base font-medium text-gray-700">Image Quantity</h3>
-            <div className="mt-2 grid grid-cols-4 gap-2">
-              {[1, 2, 3, 4].map((num) => (
-                <button
-                  key={num}
-                  onClick={() => setNoOfImages(num)}
-                  className={`flex items-center justify-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all
-                    ${noOfImages === num 
-                      ? 'border-[#FFA41D] shadow-[0_0_10px_rgba(255,164,29,0.3)] bg-[#FFA41D]/10' 
-                      : 'border-gray-300'}`}
+    <div className="flex flex-col lg:flex-row">
+      {/* Settings Panel Container */}
+      <div className="w-full lg:w-[18%]">
+        <div className="w-full lg:sticky lg:top-24 lg:h-[calc(100vh-96px)] lg:overflow-y-auto">
+          <div className="bg-white border-b lg:border-b-0 lg:border-r border-gray-200 p-5">
+            {/* Model Settings */}
+            <div className="bg-white rounded-xl p-6 shadow-sm">
+              {/* Model Version */}
+              <div className="mb-6">
+                <h3 className="text-base font-medium text-gray-700">Model</h3>
+                <select
+                  value={model}
+                  onChange={
+                    (e) => {
+                      setModel(e.target.value);
+                      handleResolutionChange(model === 'flux' ? ImageResolutions.FLUXSQUARE : ImageResolutions.SQUARE);
+                    }
+                  }
+                  className="mt-2 block w-full pl-3 pr-10 py-2 text-base border border-gray-300 focus:outline-none focus:ring-[#FFA41D] focus:border-[#FFA41D] rounded-md"
                 >
-                  {num}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
+                  <option value="flux">Flux Dev</option>
+                  <option value="pony">Pony Diffusion</option>
+                </select>
+              </div>
 
-        {/* Plan Section */}
-        <div className="mt-6 bg-white rounded-xl p-6 shadow-sm">
-          <div className="flex items-center justify-between">
-            <div>
-              <h3 className="text-base font-medium text-gray-900">Plan</h3>
-             
+              {/* Image Settings */}
+              <div className="mb-6">
+                <h3 className="text-base font-medium text-gray-700">Image Settings</h3>
+                <div className="mt-2 grid grid-cols-3 gap-2">
+                  <button 
+                    className={`aspect-square border rounded-md hover:bg-gray-50 focus:outline-none relative group overflow-hidden
+                      ${imgResolution === ImageResolutions.SQUARE || imgResolution === ImageResolutions.FLUXSQUARE
+                        ? 'border-[#FFA41D] shadow-[0_0_10px_rgba(255,164,29,0.3)]' 
+                        : 'border-gray-300'}`}
+                    onClick={() => handleResolutionChange(model === 'flux' ? ImageResolutions.FLUXSQUARE : ImageResolutions.SQUARE)}
+                  >
+                    <div className={`absolute inset-2 rounded transition-colors
+                      ${imgResolution === ImageResolutions.SQUARE || imgResolution === ImageResolutions.FLUXSQUARE
+                        ? 'bg-[#FFA41D]/10' 
+                        : 'bg-gray-100 group-hover:bg-gray-200'}`}
+                    ></div>
+                    <span className="absolute inset-0 flex items-center justify-center text-sm font-medium text-gray-700">1:1</span>
+                  </button>
+                  <button 
+                    className={`aspect-[9/5] border rounded-md hover:bg-gray-50 focus:outline-none relative group overflow-hidden
+                      ${imgResolution === ImageResolutions.LANDSCAPE ||imgResolution === ImageResolutions.FLUXLANDSCAPE
+                        ? 'border-[#FFA41D] shadow-[0_0_10px_rgba(255,164,29,0.3)]' 
+                        : 'border-gray-300'}`}
+                    onClick={() => handleResolutionChange(model === 'flux' ? ImageResolutions.FLUXLANDSCAPE : ImageResolutions.LANDSCAPE)}
+                  >
+                    <div className={`absolute inset-2 rounded transition-colors
+                      ${imgResolution === ImageResolutions.LANDSCAPE || imgResolution === ImageResolutions.FLUXLANDSCAPE
+                        ? 'bg-[#FFA41D]/10' 
+                        : 'bg-gray-100 group-hover:bg-gray-200'}`}
+                    ></div>
+                    <span className="absolute inset-0 flex items-center justify-center text-sm font-medium text-gray-700">9:16</span>
+                  </button>
+                  <button 
+                    className={`aspect-[9/16] border rounded-md hover:bg-gray-50 focus:outline-none relative group overflow-hidden
+                      ${imgResolution === ImageResolutions.PORTRAIT || imgResolution === ImageResolutions.FLUXPORTRAIT
+                        ? 'border-[#FFA41D] shadow-[0_0_10px_rgba(255,164,29,0.3)]' 
+                        : 'border-gray-300'}`}
+                    onClick={() => handleResolutionChange(model === 'flux' ? ImageResolutions.FLUXPORTRAIT : ImageResolutions.PORTRAIT)}
+                  >
+                    <div className={`absolute inset-2 rounded transition-colors
+                      ${imgResolution === ImageResolutions.PORTRAIT || imgResolution === ImageResolutions.FLUXPORTRAIT
+                        ? 'bg-[#FFA41D]/10' 
+                        : 'bg-gray-100 group-hover:bg-gray-200'}`}
+                    ></div>
+                    <span className="absolute inset-0 flex items-center justify-center text-sm font-medium text-gray-700">9:16</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Image Quantity */}
+              <div>
+                <h3 className="text-base font-medium text-gray-700">Image Quantity</h3>
+                <div className="mt-2 grid grid-cols-4 gap-2">
+                  {[1, 2, 3, 4].map((num) => (
+                    <button
+                      key={num}
+                      onClick={() => setNoOfImages(num)}
+                      className={`flex items-center justify-center px-4 py-2 border rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-all
+                        ${noOfImages === num 
+                          ? 'border-[#FFA41D] shadow-[0_0_10px_rgba(255,164,29,0.3)] bg-[#FFA41D]/10' 
+                          : 'border-gray-300'}`}
+                    >
+                      {num}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </div>
-            <button className="bg-[#FFA41D] text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors">
-              Upgrade
-            </button>
+
+            {/* Plan Section */}
+            <div className="mt-6 bg-white rounded-xl p-6 shadow-sm">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="text-base font-bold text-gray-900">Plan</h3>
+           
+                </div>
+                <button className="bg-[#FFA41D] text-white px-4 py-2 rounded-lg hover:bg-opacity-90 transition-colors">
+                  Upgrade
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Main Content Area - Full width on mobile, 82% width on desktop */}
-      <div className="w-full lg:w-[82%] lg:ml-[18%] flex flex-col mt-24">
+      {/* Main Content Area */}
+      <div className="w-full lg:w-[82%]">
         {/* Generation Input Area */}
-        <div className="p-6">
+        <div className="p-5">
           <div className="relative">
             {/* Glowing border effect */}
             <div className="absolute -inset-1 bg-gradient-to-r from-[#EEFF02] to-[#FFA41D] rounded-xl blur-sm"></div>
@@ -246,19 +250,17 @@ const Settings = () => {
         </div>
 
         {/* Recent Generations Section */}
-        <div className="p-6">
-          <div className="bg-white rounded-xl p-6 shadow-sm">
-            <h2 className="text-xl font-semibold mb-6">Recent Generations</h2>
-            <GallerySection generations={combinedGenerations} />
-            {hasNextPage && (
-              <div ref={ref} className="h-20 flex items-center justify-center mt-8">
-                <div className="animate-spin rounded-full h-8 w-8 border-2 border-indigo-600 border-t-transparent"></div>
-              </div>
-            )}
-            {!hasNextPage && combinedGenerations.length > 0 && (
-              <p className="text-center text-gray-500 mt-8">No more images to load</p>
-            )}
-          </div>
+        <div className="p-5">
+          <h2 className="text-xl font-bold mb-6">Recent Generations</h2>
+          <GallerySection generations={combinedGenerations} />
+          {hasNextPage && (
+            <div ref={ref} className="h-20 flex items-center justify-center mt-8">
+              <div className="animate-spin rounded-full h-8 w-8 border-2 border-indigo-600 border-t-transparent"></div>
+            </div>
+          )}
+          {!hasNextPage && combinedGenerations.length > 0 && (
+            <p className="text-center text-gray-500 mt-8">No more images to load</p>
+          )}
         </div>
       </div>
     </div>

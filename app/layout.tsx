@@ -1,5 +1,6 @@
 import './globals.css'
 import Header from './components/Header'
+import Footer from './components/Footer'
 import { Montserrat } from 'next/font/google'
 import { Fredoka } from 'next/font/google'
 import { Metadata } from 'next'
@@ -38,14 +39,14 @@ export default function RootLayout({
             href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
           />
         </head>
-        <body className={montserrat.className}>
-        
-          <main>
+        <body className={`${montserrat.className} flex flex-col min-h-screen`}>
           <HeaderWrapper />
+          <main className="flex-grow pt-24">
             <Providers>
               {children}
             </Providers>
           </main>
+          <Footer />
           <Toaster richColors position="top-center" />
         </body>
       </html>

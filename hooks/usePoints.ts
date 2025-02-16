@@ -18,6 +18,7 @@ export function usePoints({ userId, sessionId }: UsePointsProps) {
   const [points, setPoints] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showBonusModal, setShowBonusModal] = useState(false);
 
   useEffect(() => {
     console.log('usePoints effect triggered:', { userId, sessionId });
@@ -80,22 +81,68 @@ export function usePoints({ userId, sessionId }: UsePointsProps) {
         // Fetch points for authenticated user
         const { data, error } = await supabase
           .from('user_points')
-          .select('points_remaining')
+          .select('points_remaining, points_last_updated')
           .eq('clerk_user_id', userId)
           .single();
 
         if (error) throw error;
-        setPoints(data?.points_remaining ?? null);
+
+        const lastUpdated = data?.points_last_updated ? new Date(data.points_last_updated) : null;
+        const now = new Date();
+        const hoursSinceLastUpdate = lastUpdated 
+          ? (now.getTime() - lastUpdated.getTime()) / (1000 * 60 * 60)
+          : null;
+
+        if (hoursSinceLastUpdate === null || hoursSinceLastUpdate >= 24) {
+          // Add 10 points and update the last updated timestamp
+          const newPoints = (data?.points_remaining ?? 0) + 10;
+          const { error: updateError } = await supabase
+            .from('user_points')
+            .update({ 
+              points_remaining: newPoints,
+              points_last_updated: now.toISOString()
+            })
+            .eq('clerk_user_id', userId);
+
+          if (updateError) throw updateError;
+          setPoints(newPoints);
+          setShowBonusModal(true);
+        } else {
+          setPoints(data?.points_remaining ?? null);
+        }
       } else if (sessionId) {
         // Fetch points for unauthenticated session
         const { data, error } = await supabase
           .from('anonymous_sessions')
-          .select('points_remaining')
+          .select('points_remaining, points_last_updated')
           .eq('id', sessionId)
           .single();
 
         if (error) throw error;
-        setPoints(data?.points_remaining ?? null);
+
+        const lastUpdated = data?.points_last_updated ? new Date(data.points_last_updated) : null;
+        const now = new Date();
+        const hoursSinceLastUpdate = lastUpdated 
+          ? (now.getTime() - lastUpdated.getTime()) / (1000 * 60 * 60)
+          : null;
+
+        if (hoursSinceLastUpdate === null || hoursSinceLastUpdate >= 24) {
+          // Add 10 points and update the last updated timestamp
+          const newPoints = (data?.points_remaining ?? 0) + 10;
+          const { error: updateError } = await supabase
+            .from('anonymous_sessions')
+            .update({ 
+              points_remaining: newPoints,
+              points_last_updated: now.toISOString()
+            })
+            .eq('id', sessionId);
+
+          if (updateError) throw updateError;
+          setPoints(newPoints);
+          setShowBonusModal(true);
+        } else {
+          setPoints(data?.points_remaining ?? null);
+        }
       }
     } catch (err) {
       console.error('Error fetching points:', err);
@@ -136,6 +183,8 @@ export function usePoints({ userId, sessionId }: UsePointsProps) {
     loading,
     error,
     refetchPoints: fetchPoints,
-    updatePoints
+    updatePoints,
+    showBonusModal,
+    setShowBonusModal
   };
 }

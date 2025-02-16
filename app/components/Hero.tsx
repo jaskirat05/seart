@@ -5,6 +5,7 @@ import { ImageResolutions } from '@/types/imageResolution';
 import { toast } from 'sonner';
 import { useUser } from '@clerk/nextjs';
 import { useGenerationStatus } from '@/hooks/useGenerationStatus';
+import Footer from './Footer';
 
 const Hero = () => {
   const [prompt, setPrompt] = useState('');
@@ -163,6 +164,7 @@ const Hero = () => {
       {/* Image Display with Action Buttons */}
      
       <ImageDisplay imageUrl={imageUrl} isLoading={isLoading} seed= {seed} onRefresh={generateSeed} />
+      
     </section>
   );
 };
