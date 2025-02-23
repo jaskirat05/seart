@@ -8,6 +8,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import BonusPointsModal from './BonusPointsModal';
 import RecentGenerations from './RecentGenerations';
+import PointsPackModal from './PointsPackModal';
 
 interface HeaderProps {
   sessionId?: string | null;
@@ -26,16 +27,28 @@ const Header = ({ sessionId, userId, points = 0, loading = false, recentGenerati
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [showPointsWarning, setShowPointsWarning] = useState(false);
   const [showBonusPointsModal, setShowBonusPointsModal] = useState(false);
-  const { isSignedIn } = useUser();
-  console.log("Hey I am the header",userId)
-  console.log(sessionId)
-  const { points: userPoints, loading: userLoading, showBonusModal, setShowBonusModal } = usePoints({ userId: userId ? userId : undefined, sessionId: sessionId ? sessionId : undefined });
+  const [isPointsModalOpen, setIsPointsModalOpen] = useState(false);
+  const { isSignedIn, isLoaded } = useUser();
+  const { points: userPoints, loading: userLoading, refetchPoints, showBonusModal, setShowBonusModal } = usePoints({ 
+    userId: userId ? userId : undefined, 
+    sessionId: sessionId ? sessionId : undefined 
+  });
+
+  // Fetch points immediately when component mounts or auth state changes
+  useEffect(() => {
+    if (isLoaded && (userId || sessionId)) {
+      refetchPoints();
+    }
+  }, [isLoaded, userId, sessionId]);
 
   useEffect(() => {
     if (!userLoading && userPoints === 0) {
       setShowPointsWarning(true);
     }
   }, [userPoints, userLoading]);
+
+  console.log("Hey I am the header",userId)
+  console.log(sessionId)
 
   return (
     <header className="w-full bg-white shadow-[0_4px_20px_rgba(0,0,0,0.15)] fixed top-0 z-40">
@@ -68,6 +81,12 @@ const Header = ({ sessionId, userId, points = 0, loading = false, recentGenerati
             <span className="text-lg font-medium">
               {userLoading ? "..." : userPoints} 
             </span>
+            <button
+              onClick={() => setIsPointsModalOpen(true)}
+              className="flex items-center justify-center w-4 h-4 rounded-full bg-[#FFA41D] hover:bg-[#FFA41D]/90 transition-colors"
+            >
+              <span className="text-white text-xs font-bold leading-none mb-0.5">+</span>
+            </button>
             <span>
               <Link href="/pricing" className="px-4 py-2 rounded-lg text-white bg-[#FFA41D] hover:bg-opacity-80 hover:text-white/80 transition-colors">
                 Upgrade
@@ -199,21 +218,29 @@ const Header = ({ sessionId, userId, points = 0, loading = false, recentGenerati
             <div className="flex justify-end space-x-3">
               <button
                 onClick={() => setShowPointsWarning(false)}
-                className="px-4 py-2 text-gray-600 hover:text-gray-800"
+                className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
               >
-                Close
+                Later
               </button>
-              <Link
-                href="/pricing"
-                className="px-4 py-2 bg-[#FFA41D] text-white rounded-lg hover:bg-opacity-80"
-                onClick={() => setShowPointsWarning(false)}
+              <button
+                onClick={() => {
+                  setShowPointsWarning(false);
+                  setIsPointsModalOpen(true);
+                }}
+                className="px-4 py-2 bg-[#FFA41D] text-white rounded-lg hover:bg-opacity-80 transition-colors"
               >
-                Get More Points
-              </Link>
+                View Offers
+              </button>
             </div>
           </div>
         </div>
       )}
+
+      {/* Points Pack Modal */}
+      <PointsPackModal 
+        isOpen={isPointsModalOpen}
+        onClose={() => setIsPointsModalOpen(false)}
+      />
 
       {/* Bonus Points Modal */}
       <BonusPointsModal 

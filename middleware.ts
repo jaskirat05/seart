@@ -47,12 +47,13 @@ export default clerkMiddleware(async (auth, req) => {
     if (!userId && publicRoutes(req)) {
         console.log("in a publicrouter")
         const cookieStore = await cookies();
-      if (!cookieStore.has('anon_session_id')) {
-
+       if (!cookieStore.has('anon_session_id')) {
+        console.log("Creaing a new session, user doesn't have an existing one")
         
         const ip = req.headers.get('x-real-ip') ?? 
                   req.headers.get('x-forwarded-for') ?? 
                   'unknown';
+        console.log("IP FOUND IS",ip)
         try {
             // Check Redis first
             let sessionCache = await SessionManager.getSessionCache(ip);
@@ -66,8 +67,10 @@ export default clerkMiddleware(async (auth, req) => {
                     );
                 }
             } else {
+              console.log("creating session")
                 // Create new session in Postgres
                 const session = await PointsManager.getOrCreateAnonymousSession(ip);
+                console.log("Session details",session)
                 // Cache in Redis
                 await SessionManager.createSessionCache(session.id, ip);
                 sessionCache = await SessionManager.getSessionCache(ip);

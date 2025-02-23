@@ -5,6 +5,31 @@ import Header from '../components/Header';
 
 const PricingPage = () => {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubscribe = async (priceId: string) => {
+    try {
+      setLoading(true);
+      const response = await fetch('/api/create-checkout-session', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          priceId,
+        }),
+      });
+
+      const data = await response.json();
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch (error) {
+      console.error('Error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const plans = {
     monthly: [
@@ -18,7 +43,8 @@ const PricingPage = () => {
           'Community access'
         ],
         buttonText: 'Get Started',
-        isPopular: false
+        isPopular: false,
+        priceId: 'free_monthly'
       },
       {
         name: 'Pro',
@@ -31,7 +57,8 @@ const PricingPage = () => {
           'No watermark',
         ],
         buttonText: 'Upgrade to Pro',
-        isPopular: true
+        isPopular: true,
+        priceId: 'price_1QvRzTH7oyFccUtbPWsd3u1e'
       }
     ],
     yearly: [
@@ -45,12 +72,12 @@ const PricingPage = () => {
          
         ],
         buttonText: 'Get Started',
-        isPopular: false
+        isPopular: false,
+        priceId: ''
       },
       {
         name: 'Pro',
         price: 60,
-        
         features: [
           '10,000 energy per month for 12 months',
           'All resolution options',
@@ -60,14 +87,14 @@ const PricingPage = () => {
         ],
         buttonText: 'Upgrade to Pro',
         isPopular: true,
-        savings: '2 months free!'
+        savings: '2 months free!',
+        priceId: 'price_1QvRzeH7oyFccUtbX2940hkd'
       }
     ]
   };
 
   return (
     <div className="min-h-screen bg-white">
-      
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
         {/* Heading */}
         <div className="text-center">
@@ -139,13 +166,15 @@ const PricingPage = () => {
                   </p>
                 )}
                 <button
+                  onClick={() => handleSubscribe(plan.priceId)}
+                  disabled={loading || plan.price === 0}
                   className={`mt-8 block w-full py-3 px-6 border border-transparent rounded-md text-center font-medium ${
                     plan.isPopular
                       ? 'bg-[#FFA41D] text-white hover:bg-[#FFA41D]/90'
                       : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border-gray-200'
-                  }`}
+                  } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                  {plan.buttonText}
+                  {loading ? 'Loading...' : plan.buttonText}
                 </button>
               </div>
               <div className="px-6 pt-6 pb-8">
