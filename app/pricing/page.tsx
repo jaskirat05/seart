@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import Header from '../components/Header';
+import { toast } from 'sonner';
+import { SignInButton, SignUpButton } from '@clerk/nextjs';
 
 const PricingPage = () => {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
@@ -20,12 +22,39 @@ const PricingPage = () => {
         }),
       });
 
+      if (response.status === 401) {
+        const toastId = toast.error('You need to be logged in to purchase a subscription', {
+          description: (
+            <div className="flex gap-2 mt-2">
+              <SignInButton mode="modal">
+                <button 
+                  onClick={() => toast.dismiss(toastId)}
+                  className="bg-[#FFA41D] text-white px-4 py-1.5 rounded-lg text-sm hover:bg-[#FFA41D]/90"
+                >
+                  Login
+                </button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button 
+                  onClick={() => toast.dismiss(toastId)}
+                  className="bg-white text-[#FFA41D] border border-[#FFA41D] px-4 py-1.5 rounded-lg text-sm hover:bg-[#FFA41D]/10"
+                >
+                  Sign up
+                </button>
+              </SignUpButton>
+            </div>
+          ),
+        });
+        return;
+      }
+
       const data = await response.json();
       if (data.url) {
         window.location.href = data.url;
       }
     } catch (error) {
       console.error('Error:', error);
+      toast.error('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }

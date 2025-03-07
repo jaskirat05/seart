@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react';
 import { pointsPacks } from '@/constants/pointsPacks';
 import PointsPackCarousel from './PointsPackCarousel';
+import { toast } from 'sonner';
+import { SignInButton, SignUpButton } from '@clerk/nextjs';
 
 interface PointsPackModalProps {
   isOpen: boolean;
@@ -39,12 +41,39 @@ export default function PointsPackModal({ isOpen, onClose }: PointsPackModalProp
         }),
       });
 
+      if (response.status === 401) {
+        const toastId = toast.error('You need to be logged in to purchase points', {
+          description: (
+            <div className="flex gap-2 mt-2">
+              <SignInButton mode="modal">
+                <button 
+                  onClick={() => toast.dismiss(toastId)}
+                  className="bg-[#FFA41D] text-white px-4 py-1.5 rounded-lg text-sm hover:bg-[#FFA41D]/90"
+                >
+                  Login
+                </button>
+              </SignInButton>
+              <SignUpButton mode="modal">
+                <button 
+                  onClick={() => toast.dismiss(toastId)}
+                  className="bg-white text-[#FFA41D] border border-[#FFA41D] px-4 py-1.5 rounded-lg text-sm hover:bg-[#FFA41D]/10"
+                >
+                  Sign up
+                </button>
+              </SignUpButton>
+            </div>
+          ),
+        });
+        return;
+      }
+
       const data = await response.json();
       if (data.url) {
         window.location.href = data.url;
       }
     } catch (error) {
       console.error('Error:', error);
+      toast.error('Something went wrong. Please try again.');
     } finally {
       setLoading(false);
     }
