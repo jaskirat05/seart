@@ -87,7 +87,7 @@ const PricingPage = () => {
         ],
         buttonText: 'Upgrade to Pro',
         isPopular: true,
-        priceId: 'price_1QvRzTH7oyFccUtbPWsd3u1e'
+        priceId: 'price_1QzzdTHFjWk1ZO4qdALHb9Ie'
       }
     ],
     yearly: [
@@ -117,7 +117,7 @@ const PricingPage = () => {
         buttonText: 'Upgrade to Pro',
         isPopular: true,
         savings: '2 months free!',
-        priceId: 'price_1QvRzeH7oyFccUtbX2940hkd'
+        priceId: 'price_1QzzdtHFjWk1ZO4qVT2wUsGB'
       }
     ]
   };
