@@ -35,6 +35,7 @@ const Header = ({ sessionId, userId, points = 0, loading = false, recentGenerati
   });
 
   useEffect(() => {
+    
     if (!userLoading && userPoints === 0) {
       setShowPointsWarning(true);
     }
@@ -43,8 +44,8 @@ const Header = ({ sessionId, userId, points = 0, loading = false, recentGenerati
   return (
     <header className="w-full bg-white shadow-[0_4px_20px_rgba(0,0,0,0.15)] fixed top-0 z-40">
       <div className="w-full h-[60px]">
-        <div className="grid grid-cols-3 items-center h-full px-4 sm:px-8 md:px-16 lg:px-[120px] relative">
-          {/* Logo */}
+        <div className="flex items-center justify-between h-full px-4 sm:px-8 md:px-16 lg:px-[120px] relative">
+          {/* Left Section: Logo */}
           <div className="flex items-center">
             {/* Mobile Menu Button */}
             <button 
@@ -65,7 +66,7 @@ const Header = ({ sessionId, userId, points = 0, loading = false, recentGenerati
             </div>
           </div>
 
-          {/* Points Display (Desktop) */}
+          {/* Center Section: Points Display (Desktop) */}
           <div className="hidden md:flex items-center justify-center space-x-4">
             <div className="flex items-center space-x-2">
               <IoLeaf className="text-[#FFA41D] text-xl" />
@@ -84,9 +85,9 @@ const Header = ({ sessionId, userId, points = 0, loading = false, recentGenerati
             </Link>
           </div>
 
-          {/* Desktop Navigation */}
-          <div className="flex items-center justify-end md:space-x-4">
-            <Link href="/settings" className="hidden md:inline-flex px-4 py-2 rounded-lg text-white bg-[#FFA41D] hover:bg-opacity-80 hover:text-white/80 transition-colors">
+          {/* Right Section: Navigation */}
+          <div className="flex items-center space-x-4">
+            <Link href="/settings" className="inline-flex px-4 py-2 rounded-lg text-white bg-[#FFA41D] hover:bg-opacity-80 hover:text-white/80 transition-colors">
               Create
             </Link>
             {/* Auth buttons - only show on desktop */}
@@ -155,18 +156,6 @@ const Header = ({ sessionId, userId, points = 0, loading = false, recentGenerati
               Upgrade Plan
             </Link>
           </div>
-        </div>
-
-        {/* Navigation Links */}
-        <div className="px-6">
-          <Link
-            href="/settings"
-            onClick={() => setIsDrawerOpen(false)}
-            className="flex items-center py-3 text-gray-700 hover:text-[#FFA41D] transition-colors"
-          >
-            <span className="material-symbols-outlined mr-3">settings</span>
-            Settings
-          </Link>
         </div>
 
         {/* Recent Generations */}
