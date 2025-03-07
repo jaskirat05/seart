@@ -21,8 +21,11 @@ const fredoka = Fredoka({
 })
 
 export const metadata: Metadata = {
-  title: "Sea Art",
+  title: "hellsk(Hell's Kitchen)",
   description: 'Create beautiful AI art in seconds',
+  icons: {
+    icon: '/favicon.svg'
+  }
 }
 
 export default function RootLayout({
