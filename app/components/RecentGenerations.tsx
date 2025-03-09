@@ -15,6 +15,11 @@ const RecentGenerations = ({ userId, sessionId }: RecentGenerationsProps) => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
   const [scrollPosition, setScrollPosition] = useState(0);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
+
+  // Minimum swipe distance (in px)
+  const minSwipeDistance = 50;
 
   const handleScroll = (e: React.UIEvent<HTMLDivElement>) => {
     const container = e.currentTarget;
@@ -32,6 +37,58 @@ const RecentGenerations = ({ userId, sessionId }: RecentGenerationsProps) => {
     if (imageIndex !== currentIndex) {
       setCurrentIndex(imageIndex);
     }
+  };
+
+  // Touch event handlers
+  const onTouchStart = (e: TouchEvent<HTMLDivElement>) => {
+    setTouchEnd(null); // Reset touchEnd
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const onTouchMove = (e: TouchEvent<HTMLDivElement>) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  };
+
+  const onTouchEnd = () => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+    
+    // Handle swipe with boundary checks
+    if (isLeftSwipe && currentIndex < generations.length - 1) {
+      // Swipe left (next image)
+      scrollToImage(currentIndex + 1);
+    } else if (isRightSwipe && currentIndex > 0) {
+      // Swipe right (previous image)
+      scrollToImage(currentIndex - 1);
+    } else {
+      // Return to current image if swipe wasn't enough or at boundary
+      scrollToImage(currentIndex);
+    }
+  };
+
+  // Function to scroll to a specific image
+  const scrollToImage = (index: number) => {
+    if (!containerRef.current || generations.length === 0) return;
+    
+    // Ensure index is within bounds
+    const safeIndex = Math.max(0, Math.min(index, generations.length - 1));
+    
+    // Calculate scroll position based on index
+    const container = containerRef.current;
+    const maxScroll = container.scrollWidth - container.clientWidth;
+    const scrollPercentage = safeIndex / (generations.length - 1);
+    const newScrollPosition = maxScroll * scrollPercentage;
+    
+    // Smooth scroll to the position
+    container.scrollTo({
+      left: newScrollPosition,
+      behavior: 'smooth'
+    });
+    
+    setCurrentIndex(safeIndex);
   };
 
   useEffect(() => {
@@ -111,11 +168,14 @@ const RecentGenerations = ({ userId, sessionId }: RecentGenerationsProps) => {
           </p>
         </div>
 
-        {/* Scroll Container */}
+        {/* Scroll Container with Touch Events */}
         <div 
           ref={containerRef}
           className="absolute inset-0 overflow-x-auto scrollbar-hide"
           onScroll={handleScroll}
+          onTouchStart={onTouchStart}
+          onTouchMove={onTouchMove}
+          onTouchEnd={onTouchEnd}
         >
           <div className="w-[300%] h-full" />
         </div>
@@ -125,7 +185,8 @@ const RecentGenerations = ({ userId, sessionId }: RecentGenerationsProps) => {
           {generations.map((_, index) => (
             <div
               key={index}
-              className={`w-1.5 h-1.5 rounded-full transition-all ${
+              onClick={() => scrollToImage(index)}
+              className={`w-1.5 h-1.5 rounded-full transition-all cursor-pointer ${
                 index === currentIndex 
                   ? 'bg-[#FFA41D] w-3' 
                   : 'bg-gray-300'

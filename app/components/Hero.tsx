@@ -11,9 +11,10 @@ const Hero = () => {
   const [prompt, setPrompt] = useState('');
   const [generationId, setGenerationId] = useState<string>();
   const { user, isLoaded } = useUser();
-  const [currentimageUrl,setImageUrl] = useState<string>();  
+  const [currentimageUrl, setCurrentImageUrl] = useState<string>();  
   const [seed, setSeed] = useState(0);  
   const [isDownloading, setIsDownloading] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   console.log('Hero render - generationId:', generationId);
 
@@ -30,20 +31,22 @@ const Hero = () => {
 
 
 
-  const { status, imageUrl, isLoading } = useGenerationStatus({
+  const { status, imageUrl: hookImageUrl, isLoading: hookLoading } = useGenerationStatus({
     generationId,
     onComplete: (url) => {
       console.log('Generation complete with URL:', url);
-      setImageUrl(url);
+      setCurrentImageUrl(url);
       // Don't clear generationId here, let it persist
+      setIsLoading(false);
     },
     onError: () => {
       console.log('Generation error');
       setGenerationId(undefined); // Only clear on error
+      setIsLoading(false);
     }
   });
 
-  console.log('Hook returned - status:', status, 'isLoading:', isLoading, 'imageUrl:', imageUrl);
+  console.log('Hook returned - status:', status, 'isLoading:', isLoading, 'imageUrl:', currentimageUrl);
 
   const handleGenerate = async () => {
     console.log('handleGenerate called');
@@ -51,6 +54,9 @@ const Hero = () => {
       toast.error('Please enter a prompt');
       return;
     }
+    
+    // Set loading state immediately to prevent multiple clicks
+    setIsLoading(true);
     
     try {
       const resolution = ImageResolutions.getResolution('portrait');
@@ -88,6 +94,7 @@ const Hero = () => {
         } else {
           toast.error(data.error || 'Failed to generate image');
         }
+        setIsLoading(false);
         return;
       }
 
@@ -108,6 +115,7 @@ const Hero = () => {
     } catch (error) {
       console.error('Error in handleGenerate:', error);
       toast.error('Failed to generate image');
+      setIsLoading(false);
     }
   };
 
@@ -163,7 +171,7 @@ const Hero = () => {
 
       {/* Image Display with Action Buttons */}
      
-      <ImageDisplay imageUrl={imageUrl} isLoading={isLoading} seed= {seed} onRefresh={generateSeed} />
+      <ImageDisplay imageUrl={currentimageUrl} isLoading={isLoading} seed={seed} onRefresh={generateSeed} />
       
     </section>
   );

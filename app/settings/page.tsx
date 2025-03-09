@@ -24,6 +24,7 @@ const Settings = () => {
   const [imgResolution, setResolution] = useState<ImageResolution>(ImageResolutions.FLUXSQUARE);
   const [seed, setSeed] = useState(0);
   const [noOfImages, setNoOfImages] = useState(1);
+  const [localLoading, setLocalLoading] = useState(false);
 
   const { generate, generations, isAnyLoading } = useMultiImageGeneration();
   const { ref, inView } = useInView();
@@ -81,6 +82,9 @@ const Settings = () => {
       return;
     }
     
+    // Set loading state immediately to prevent multiple clicks
+    setLocalLoading(true);
+    
     try {
       await generate({
         prompt,
@@ -107,6 +111,8 @@ const Settings = () => {
         else {
         toast.error('Failed to generate images');
       }
+    } finally {
+      setLocalLoading(false);
     }
   };
 
@@ -240,10 +246,10 @@ const Settings = () => {
               />
               <button 
                 onClick={handleGenerate}
-                disabled={isAnyLoading}
+                disabled={localLoading || isAnyLoading}
                 className="bg-[#FFA41D] text-white px-10 py-4 rounded-xl transition-colors font-medium m-2 hover:bg-opacity-90 disabled:bg-opacity-50 disabled:cursor-not-allowed"
               >
-                {isAnyLoading ? 'Generating...' : 'Generate'}
+                {localLoading || isAnyLoading ? 'Generating...' : 'Generate'}
               </button>
             </div>
           </div>
