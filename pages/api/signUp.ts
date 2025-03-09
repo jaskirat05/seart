@@ -1,4 +1,3 @@
-
 import { NextApiRequest, NextApiResponse } from 'next';
 import { Webhook } from 'svix';
 import { auth, WebhookEvent } from '@clerk/nextjs/server';
@@ -65,7 +64,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       //const sessionId=(await client.users.getUser(userId.userId!)).publicMetadata.session_id;
       
 
-
+      const{data:user_points}=await supabaseAdmin
+      .from('user_points')
+      .select('*')
+      .eq('clerk_user_id',clerkUserId)
+      if (user_points && user_points.length > 0) {
+        return res.status(200).json({
+          message: 'User already exists',
+          points: user_points[0].points_remaining,
+        });
+      }
       // Get active session if it exists
       const { data: session, error: sessionError } = await supabaseAdmin
         .from('anonymous_sessions')
@@ -136,4 +144,3 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   // Return 200 for other event types
   return res.status(200).json({ message: 'Webhook processed' });
 }
-
