@@ -104,7 +104,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const { error: updateError } = await supabaseAdmin
           .from('anonymous_sessions')
           .update({
-            status: 'converted',
+            status: 'active',
             points_remaining: 0,
             converted_user_id: clerkUserId, // Store Clerk's user ID here
           })
