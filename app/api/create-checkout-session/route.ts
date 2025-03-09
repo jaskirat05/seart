@@ -36,7 +36,7 @@ export async function POST(req: Request) {
       // One-time payment for points
       sessionConfig.line_items = [{
         price_data: {
-          currency: 'usd',
+          currency: 'eur',
           product_data: {
             name: `${points.toLocaleString()} Energy Points`,
             description: 'One-time purchase of energy points',
