@@ -97,20 +97,23 @@ export async function checkSubscriptionStatus() {
         isSubscribed: false,
         subscriptionType: null,
         subscriptionEnd: null,
-        nextPointsCredit: null
+        nextPointsCredit: null,
+        isCancelled: false
       };
     }
     
     const subscriptionType = user.publicMetadata.subscription_type as string | undefined;
     const subscriptionEnd = user.publicMetadata.subscription_end as string | undefined;
     const nextPointsCredit = user.publicMetadata.next_points_credit as string | undefined;
+    const isCancelled = !!user.publicMetadata.cancel_at_period_end;
     
     if (!subscriptionType || !subscriptionEnd) {
       return {
         isSubscribed: false,
         subscriptionType: null,
         subscriptionEnd: null,
-        nextPointsCredit: null
+        nextPointsCredit: null,
+        isCancelled: false
       };
     }
     
@@ -122,7 +125,8 @@ export async function checkSubscriptionStatus() {
       isSubscribed: isValid,
       subscriptionType: subscriptionType as 'monthly' | 'yearly',
       subscriptionEnd,
-      nextPointsCredit: nextPointsCredit || null
+      nextPointsCredit: nextPointsCredit || null,
+      isCancelled
     };
   } catch (error) {
     console.error('Error checking subscription status:', error);
@@ -131,6 +135,7 @@ export async function checkSubscriptionStatus() {
       subscriptionType: null,
       subscriptionEnd: null,
       nextPointsCredit: null,
+      isCancelled: false,
       error: error instanceof Error ? error.message : 'Unknown error'
     };
   }
@@ -185,7 +190,7 @@ export async function cancelSubscription() {
     await clerk.users.updateUser(user.id, {
       publicMetadata: {
         ...user.publicMetadata,
-        subscription_cancel_pending: true
+        cancel_at_period_end: true
       }
     });
     

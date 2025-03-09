@@ -394,12 +394,11 @@ export async function POST(req: Request) {
           console.error('Error updating subscription status:', updateError);
           throw updateError;
         }
-        const metadata = (await (await clerkClient()).users.getUser(userData.clerk_user_id)).publicMetadata;
+        //const metadata = (await (await clerkClient()).users.getUser(userData.clerk_user_id)).publicMetadata;
         // Clear subscription metadata from Clerk
         await (await clerkClient()).users.updateUser(userData.clerk_user_id, {
           publicMetadata: {
-            ...metadata,
-            cancel_at_period_end:true
+            
           }
         });
 

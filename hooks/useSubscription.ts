@@ -9,6 +9,7 @@ interface SubscriptionInfo {
   subscriptionType: 'monthly' | 'yearly' | null;
   subscriptionEnd: string | null;
   nextPointsCredit: string | null;
+  isCancelled: boolean;
 }
 
 export function useSubscription() {
@@ -17,7 +18,8 @@ export function useSubscription() {
     isSubscribed: false,
     subscriptionType: null,
     subscriptionEnd: null,
-    nextPointsCredit: null
+    nextPointsCredit: null,
+    isCancelled: false
   });
   const [loading, setLoading] = useState(true);
 
@@ -32,7 +34,8 @@ export function useSubscription() {
           isSubscribed: false,
           subscriptionType: null,
           subscriptionEnd: null,
-          nextPointsCredit: null
+          nextPointsCredit: null,
+          isCancelled: false
         });
         setLoading(false);
         return;
@@ -53,7 +56,8 @@ export function useSubscription() {
             isSubscribed: isValid,
             subscriptionType: subscriptionType as 'monthly' | 'yearly',
             subscriptionEnd: subscriptionEnd || null,
-            nextPointsCredit: nextPointsCredit || null
+            nextPointsCredit: nextPointsCredit || null,
+            isCancelled: !!user.publicMetadata.cancel_at_period_end
           });
         } else {
           // No subscription found in metadata
@@ -61,7 +65,8 @@ export function useSubscription() {
             isSubscribed: false,
             subscriptionType: null,
             subscriptionEnd: null,
-            nextPointsCredit: null
+            nextPointsCredit: null,
+            isCancelled: false
           });
         }
       } catch (error) {
@@ -71,7 +76,8 @@ export function useSubscription() {
           isSubscribed: false,
           subscriptionType: null,
           subscriptionEnd: null,
-          nextPointsCredit: null
+          nextPointsCredit: null,
+          isCancelled: false
         });
       } finally {
         setLoading(false);

@@ -10,7 +10,7 @@ import { cancelSubscription } from '@/app/actions/subscriptionActions';
 const PricingPage = () => {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
   const [loading, setLoading] = useState(false);
-  const { isSubscribed, subscriptionType, loading: subscriptionLoading } = useSubscription();
+  const { isSubscribed, subscriptionType, subscriptionEnd, isCancelled, loading: subscriptionLoading } = useSubscription();
 
   const handleSubscribe = async (priceId: string) => {
     try {
@@ -200,12 +200,24 @@ const PricingPage = () => {
         <div className="mt-8 sm:mt-16 space-y-4 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-6 lg:max-w-4xl lg:mx-auto xl:max-w-none xl:mx-0">
           {plans[billingCycle].map((plan) => {
             // Check if this plan is the user's current subscription
-            const isCurrentPlan = isSubscribed && 
+            const isCurrentPlan = isSubscribed && !isCancelled && 
               ((plan.name === 'Pro' && subscriptionType === billingCycle) || 
                (plan.name === 'Free' && !subscriptionType));
             
+            // Show free plan as active when user has no subscription
+            const isFreePlanActive = plan.name === 'Free' && (!isSubscribed || (isSubscribed && !subscriptionType));
+            
             // Check if this is the free plan and user has an active subscription
-            const showCancelButton = plan.name === 'Free' && isSubscribed;
+            const showCancelButton = plan.name === 'Free' && isSubscribed && !isCancelled;
+            
+            // Check if we need to show the subscription end message
+            const showSubscriptionEndMessage = plan.name === 'Free' && isCancelled && subscriptionEnd;
+            
+            // Format subscription end date
+            const formattedEndDate = subscriptionEnd ? new Date(subscriptionEnd).toLocaleDateString() : '';
+            
+            // Check if we should hide the button for free plan (when user has active subscription)
+            const hideFreePlanButton = plan.name === 'Free' && isSubscribed && !isCancelled;
             
             return (
               <div
@@ -223,7 +235,7 @@ const PricingPage = () => {
                     </span>
                   </div>
                 )}
-                {isCurrentPlan && (
+                {(isCurrentPlan || isFreePlanActive) && (
                   <div className="absolute top-0 left-4" style={{ transform: 'translateY(-50%)' }}>
                     <span className="inline-flex rounded-full bg-green-500 px-3 py-1 text-xs sm:text-sm font-semibold text-white whitespace-nowrap">
                       Current Plan
@@ -245,25 +257,32 @@ const PricingPage = () => {
                       {plan.savings}
                     </p>
                   )}
+                  
+                  {showSubscriptionEndMessage && (
+                    <div className="mt-4 p-3 bg-gray-50 rounded-md text-sm text-gray-700">
+                      Your Pro subscription will end on {formattedEndDate}
+                    </div>
+                  )}
+                  
                   <button
                     onClick={() => handleSubscribe(plan.priceId)}
-                    disabled={loading || plan.price === 0 || isCurrentPlan || subscriptionLoading}
+                    disabled={loading || plan.price === 0 || (isCurrentPlan && !isCancelled) || subscriptionLoading || hideFreePlanButton}
                     className={`mt-6 sm:mt-8 block w-full py-2.5 sm:py-3 px-4 sm:px-6 border border-transparent rounded-md text-center font-medium ${
-                      isCurrentPlan
+                      isCurrentPlan && !isCancelled
                         ? 'bg-white text-gray-700 border border-gray-300'
                         : plan.isPopular
                           ? 'bg-[#FFA41D] text-white hover:bg-[#FFA41D]/90'
                           : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border-gray-200'
-                    } ${(loading || subscriptionLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    } ${(loading || subscriptionLoading) ? 'opacity-50 cursor-not-allowed' : ''} ${hideFreePlanButton ? 'hidden' : ''}`}
                   >
-                    {loading ? 'Loading...' : isCurrentPlan ? 'Current Plan' : plan.buttonText}
+                    {loading ? 'Loading...' : (isCurrentPlan && !isCancelled) ? 'Current Plan' : plan.buttonText}
                   </button>
                   
                   {showCancelButton && (
                     <button
                       onClick={handleCancelSubscription}
                       disabled={loading || subscriptionLoading}
-                      className="mt-2 block w-full py-2.5 sm:py-3 px-4 sm:px-6 border border-red-300 rounded-md text-center font-medium text-red-600 hover:bg-red-50"
+                      className="mt-2 block w-full py-2.5 sm:py-3 px-4 sm:px-6 border border-gray-200 rounded-md text-center font-medium text-gray-500 hover:bg-gray-50"
                     >
                       {loading ? 'Loading...' : 'Cancel Subscription'}
                     </button>
