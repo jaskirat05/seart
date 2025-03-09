@@ -9,24 +9,24 @@ export const pointsPacks: PointsPack[] = [
   {
     id: 'starter',
     points: 10000,
-    price: 10,
+    price: 0.1,
   },
   {
     id: 'popular',
     points: 50000,
-    price: 45,
+    price: 0.1,
     savings: 'Save 10%',
   },
   {
     id: 'pro',
     points: 95000,
-    price: 75,
+    price: 0.1,
     savings: 'Save 25%',
   },
   {
     id: 'enterprise',
     points: 300000,
-    price: 150,
+    price: 0.1,
     savings: 'Save 50%',
   },
 ];
