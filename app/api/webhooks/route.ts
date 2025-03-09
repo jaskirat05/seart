@@ -92,14 +92,25 @@ async function handleSubscriptionUpdate(subscription: Stripe.Subscription, userI
       const nextCredit = new Date(now);
       nextCredit.setMonth(nextCredit.getMonth() + 1);
 
-      // Update Clerk metadata
+      // Update Clerk metadata - using publicMetadata instead of privateMetadata
       await (await clerkClient()).users.updateUserMetadata(userId, {
-        privateMetadata: {
+        publicMetadata: {
           subscription_type: 'yearly',
           subscription_start: new Date(subscription.current_period_start * 1000).toISOString(),
           subscription_end: new Date(subscription.current_period_end * 1000).toISOString(),
           next_points_credit: nextCredit.toISOString(),
           points_per_credit: SUBSCRIPTION_POINTS.yearly,
+          stripe_subscription_id: subscription.id,
+          stripe_customer_id: subscription.customer as string
+        }
+      });
+    } else {
+      // For monthly subscriptions, still update metadata but without next_points_credit
+      await (await clerkClient()).users.updateUserMetadata(userId, {
+        publicMetadata: {
+          subscription_type: 'monthly',
+          subscription_start: new Date(subscription.current_period_start * 1000).toISOString(),
+          subscription_end: new Date(subscription.current_period_end * 1000).toISOString(),
           stripe_subscription_id: subscription.id,
           stripe_customer_id: subscription.customer as string
         }
@@ -331,7 +342,7 @@ export async function POST(req: Request) {
 
         // Clear subscription metadata from Clerk
         await (await clerkClient()).users.updateUserMetadata(userData.clerk_user_id, {
-          privateMetadata: {
+          publicMetadata: {
             subscription_type: null,
             subscription_start: null,
             subscription_end: null,

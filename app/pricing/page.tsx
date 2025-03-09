@@ -1,13 +1,15 @@
 "use client"
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Header from '../components/Header';
 import { toast } from 'sonner';
 import { SignInButton, SignUpButton } from '@clerk/nextjs';
+import { useSubscription } from '@/hooks/useSubscription';
 
 const PricingPage = () => {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
   const [loading, setLoading] = useState(false);
+  const { isSubscribed, subscriptionType, loading: subscriptionLoading } = useSubscription();
 
   const handleSubscribe = async (priceId: string) => {
     try {
@@ -164,77 +166,91 @@ const PricingPage = () => {
 
         {/* Pricing Cards */}
         <div className="mt-8 sm:mt-16 space-y-4 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-6 lg:max-w-4xl lg:mx-auto xl:max-w-none xl:mx-0">
-          {plans[billingCycle].map((plan) => (
-            <div
-              key={plan.name}
-              className={`rounded-lg shadow-lg divide-y divide-gray-200 overflow-hidden ${
-                plan.isPopular
-                  ? 'border-2 border-[#FFA41D] relative'
-                  : 'border border-gray-200'
-              }`}
-            >
-              {plan.isPopular && (
-                <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2">
-                  <span className="inline-flex rounded-full bg-[#FFA41D] px-3 py-1 text-xs sm:text-sm font-semibold text-white whitespace-nowrap">
-                    Popular
-                  </span>
-                </div>
-              )}
-              <div className="p-4 sm:p-6">
-                <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">{plan.name}</h2>
-                <p className="mt-6 sm:mt-8">
-                  <span className="text-3xl sm:text-4xl font-extrabold text-gray-900">
-                    ${plan.price}
-                  </span>
-                  <span className="text-sm sm:text-base font-medium text-gray-500">
-                    {plan.price === 0 ? '' : `/${billingCycle === 'yearly' ? 'year' : 'month'}`}
-                  </span>
-                </p>
-                {plan.savings && (
-                  <p className="mt-2 text-sm text-[#FFA41D] font-semibold">
-                    {plan.savings}
-                  </p>
+          {plans[billingCycle].map((plan) => {
+            // Check if this plan is the user's current subscription
+            const isCurrentPlan = isSubscribed && 
+              ((plan.name === 'Pro' && subscriptionType === billingCycle) || 
+               (plan.name === 'Free' && !subscriptionType));
+            
+            return (
+              <div
+                key={plan.name}
+                className={`rounded-lg shadow-lg divide-y divide-gray-200 overflow-hidden ${
+                  plan.isPopular
+                    ? 'border-2 border-[#FFA41D] relative'
+                    : 'border border-gray-200'
+                } ${isCurrentPlan ? 'opacity-70' : ''}`}
+              >
+                {plan.isPopular && (
+                  <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2">
+                    <span className="inline-flex rounded-full bg-[#FFA41D] px-3 py-1 text-xs sm:text-sm font-semibold text-white whitespace-nowrap">
+                      Popular
+                    </span>
+                  </div>
                 )}
-                <button
-                  onClick={() => handleSubscribe(plan.priceId)}
-                  disabled={loading || plan.price === 0}
-                  className={`mt-6 sm:mt-8 block w-full py-2.5 sm:py-3 px-4 sm:px-6 border border-transparent rounded-md text-center font-medium ${
-                    plan.isPopular
-                      ? 'bg-[#FFA41D] text-white hover:bg-[#FFA41D]/90'
-                      : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border-gray-200'
-                  } ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  {loading ? 'Loading...' : plan.buttonText}
-                </button>
+                {isCurrentPlan && (
+                  <div className="absolute top-0 left-0 -translate-y-1/2 translate-x-1/2">
+                    <span className="inline-flex rounded-full bg-green-500 px-3 py-1 text-xs sm:text-sm font-semibold text-white whitespace-nowrap">
+                      Current Plan
+                    </span>
+                  </div>
+                )}
+                <div className="p-4 sm:p-6">
+                  <h2 className="text-xl sm:text-2xl font-semibold text-gray-900">{plan.name}</h2>
+                  <p className="mt-6 sm:mt-8">
+                    <span className="text-3xl sm:text-4xl font-extrabold text-gray-900">
+                      ${plan.price}
+                    </span>
+                    <span className="text-sm sm:text-base font-medium text-gray-500">
+                      {plan.price === 0 ? '' : `/${billingCycle === 'yearly' ? 'year' : 'month'}`}
+                    </span>
+                  </p>
+                  {plan.savings && (
+                    <p className="mt-2 text-sm text-[#FFA41D] font-semibold">
+                      {plan.savings}
+                    </p>
+                  )}
+                  <button
+                    onClick={() => handleSubscribe(plan.priceId)}
+                    disabled={loading || plan.price === 0 || isCurrentPlan || subscriptionLoading}
+                    className={`mt-6 sm:mt-8 block w-full py-2.5 sm:py-3 px-4 sm:px-6 border border-transparent rounded-md text-center font-medium ${
+                      plan.isPopular
+                        ? 'bg-[#FFA41D] text-white hover:bg-[#FFA41D]/90'
+                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border-gray-200'
+                    } ${(loading || isCurrentPlan || subscriptionLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {loading ? 'Loading...' : isCurrentPlan ? 'Current Plan' : plan.buttonText}
+                  </button>
+                </div>
+                <div className="px-4 sm:px-6 pt-4 sm:pt-6 pb-6 sm:pb-8">
+                  <h3 className="text-xs font-semibold text-gray-900 tracking-wide uppercase">
+                    What's included
+                  </h3>
+                  <ul role="list" className="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
+                    {plan.features.map((feature) => (
+                      <li key={feature} className="flex space-x-3">
+                        <svg
+                          className={`flex-shrink-0 h-5 w-5 ${
+                            plan.isPopular ? 'text-[#FFA41D]' : 'text-green-500'
+                          }`}
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
+                        >
+                          <path
+                            fillRule="evenodd"
+                            d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        <span className="text-sm text-gray-500">{feature}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               </div>
-              <div className="px-4 sm:px-6 pt-4 sm:pt-6 pb-6 sm:pb-8">
-                <h3 className="text-xs font-semibold text-gray-900 tracking-wide uppercase">
-                  What's included
-                </h3>
-                <ul role="list" className="mt-4 sm:mt-6 space-y-3 sm:space-y-4">
-                  {plan.features.map((feature) => (
-                    <li key={feature} className="flex space-x-3">
-                      <svg
-                        className={`flex-shrink-0 h-5 w-5 ${
-                          plan.isPopular ? 'text-[#FFA41D]' : 'text-green-500'
-                        }`}
-                        xmlns="http://www.w3.org/2000/svg"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      <span className="text-sm text-gray-500">{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       </div>
     </div>
