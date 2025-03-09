@@ -13,7 +13,7 @@ export const pointsPacks: PointsPack[] = [
   },
   {
     id: 'popular',
-    points: 45000,
+    points: 50000,
     price: 45,
     savings: 'Save 10%',
   },

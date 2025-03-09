@@ -99,7 +99,7 @@ export default function PointsPackModal({ isOpen, onClose }: PointsPackModalProp
           <div className="p-6">
             {/* Header */}
             <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-semibold">Get More Points</h2>
+              <h2 className="text-xl font-semibold">Get More Credits</h2>
               <button
                 onClick={onClose}
                 className="text-gray-400 hover:text-gray-600"
@@ -137,7 +137,7 @@ export default function PointsPackModal({ isOpen, onClose }: PointsPackModalProp
                     {pack.points.toLocaleString()}
                   </div>
                   <div className={index === 1 ? 'text-white/80' : 'text-gray-500'}>
-                    Points
+                    Credits
                   </div>
                   <div className={`text-3xl font-bold my-4 ${index === 1 ? 'text-white' : 'text-gray-900'}`}>
                     ${pack.price}
@@ -151,7 +151,7 @@ export default function PointsPackModal({ isOpen, onClose }: PointsPackModalProp
                         : 'bg-[#FFA41D] text-white hover:bg-[#FFA41D]/90'
                     } disabled:opacity-50`}
                   >
-                    {loading ? 'Processing...' : 'Get Points'}
+                    {loading ? 'Processing...' : 'Get Credits'}
                   </button>
                 </div>
               ))}

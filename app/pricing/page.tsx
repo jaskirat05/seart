@@ -78,9 +78,10 @@ const PricingPage = () => {
       {
         name: 'Pro',
         price: 10,
-        savings: '5000 extra energy for first month',
+        savings: '5000 extra credit for first month',
         features: [
-          '10,000 energy per month',
+          '10,000 credit per month',
+          'Able to generate 10,000 Flux images per month',
           'All resolution options',
           'Acess to latest models',
           'No watermark',
@@ -108,7 +109,7 @@ const PricingPage = () => {
         name: 'Pro',
         price: 60,
         features: [
-          '10,000 energy per month for 12 months',
+          '10,000 images(Flux.dev) per month for 12 months',
           'All resolution options',
           'Acesss to latest models',
           'Advanced image editing(Coming soon)',
