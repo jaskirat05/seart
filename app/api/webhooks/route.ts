@@ -200,6 +200,44 @@ export async function POST(req: Request) {
         break;
       }
 
+      case 'customer.subscription.created': {
+        const subscription = event.data.object as Stripe.Subscription;
+        
+        console.log('🆕 Subscription Created Event:', JSON.stringify({
+          subscription_id: subscription.id,
+          customer: subscription.customer,
+          status: subscription.status,
+          current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
+          current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+          items: subscription.items.data.map(item => ({
+            price_id: item.price.id,
+            interval: item.price.recurring?.interval
+          }))
+        }, null, 2));
+
+        // Get the user associated with this customer
+        const { data: userData, error: userError } = await supabase
+          .from('user_points')
+          .select('clerk_user_id')
+          .eq('stripe_customer_id', subscription.customer)
+          .single();
+
+        if (userError) {
+          console.error('Error finding user for subscription:', userError);
+          throw userError;
+        }
+
+        // Process the new subscription
+        await handleSubscriptionUpdate(
+          subscription, 
+          userData.clerk_user_id, 
+          'subscription_purchased'
+        );
+        
+        console.log(`✅ Processed new subscription for user ${userData.clerk_user_id}`);
+        break;
+      }
+
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
         const previousAttributes = event.data.previous_attributes as Partial<Stripe.Subscription>;
