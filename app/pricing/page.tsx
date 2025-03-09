@@ -5,6 +5,7 @@ import Header from '../components/Header';
 import { toast } from 'sonner';
 import { SignInButton, SignUpButton } from '@clerk/nextjs';
 import { useSubscription } from '@/hooks/useSubscription';
+import { cancelSubscription } from '@/app/actions/subscriptionActions';
 
 const PricingPage = () => {
   const [billingCycle, setBillingCycle] = useState<'monthly' | 'yearly'>('yearly');
@@ -57,6 +58,37 @@ const PricingPage = () => {
     } catch (error) {
       console.error('Error:', error);
       toast.error('Something went wrong. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancelSubscription = async () => {
+    if (!confirm('Are you sure you want to cancel your subscription? You will lose access to premium features at the end of your billing period.')) {
+      return;
+    }
+    
+    setLoading(true);
+    try {
+      const result = await cancelSubscription();
+      
+      if (result.success) {
+        toast.success('Your subscription has been cancelled', {
+          description: result.message,
+        });
+        
+        // Refresh the page after a short delay to update UI
+        setTimeout(() => {
+          window.location.reload();
+        }, 2000);
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (error) {
+      console.error('Error cancelling subscription:', error);
+      toast.error('Failed to cancel subscription', {
+        description: error instanceof Error ? error.message : 'Please try again or contact support.',
+      });
     } finally {
       setLoading(false);
     }
@@ -172,24 +204,27 @@ const PricingPage = () => {
               ((plan.name === 'Pro' && subscriptionType === billingCycle) || 
                (plan.name === 'Free' && !subscriptionType));
             
+            // Check if this is the free plan and user has an active subscription
+            const showCancelButton = plan.name === 'Free' && isSubscribed;
+            
             return (
               <div
                 key={plan.name}
-                className={`rounded-lg shadow-lg divide-y divide-gray-200 overflow-hidden ${
+                className={`rounded-lg shadow-lg divide-y divide-gray-200 overflow-visible ${
                   plan.isPopular
                     ? 'border-2 border-[#FFA41D] relative'
                     : 'border border-gray-200'
-                } ${isCurrentPlan ? 'opacity-70' : ''}`}
+                }`}
               >
                 {plan.isPopular && (
-                  <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2">
+                  <div className="absolute top-0 right-4" style={{ transform: 'translateY(-50%)' }}>
                     <span className="inline-flex rounded-full bg-[#FFA41D] px-3 py-1 text-xs sm:text-sm font-semibold text-white whitespace-nowrap">
                       Popular
                     </span>
                   </div>
                 )}
                 {isCurrentPlan && (
-                  <div className="absolute top-0 left-0 -translate-y-1/2 translate-x-1/2">
+                  <div className="absolute top-0 left-4" style={{ transform: 'translateY(-50%)' }}>
                     <span className="inline-flex rounded-full bg-green-500 px-3 py-1 text-xs sm:text-sm font-semibold text-white whitespace-nowrap">
                       Current Plan
                     </span>
@@ -214,13 +249,25 @@ const PricingPage = () => {
                     onClick={() => handleSubscribe(plan.priceId)}
                     disabled={loading || plan.price === 0 || isCurrentPlan || subscriptionLoading}
                     className={`mt-6 sm:mt-8 block w-full py-2.5 sm:py-3 px-4 sm:px-6 border border-transparent rounded-md text-center font-medium ${
-                      plan.isPopular
-                        ? 'bg-[#FFA41D] text-white hover:bg-[#FFA41D]/90'
-                        : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border-gray-200'
-                    } ${(loading || isCurrentPlan || subscriptionLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      isCurrentPlan
+                        ? 'bg-white text-gray-700 border border-gray-300'
+                        : plan.isPopular
+                          ? 'bg-[#FFA41D] text-white hover:bg-[#FFA41D]/90'
+                          : 'bg-gray-50 text-gray-700 hover:bg-gray-100 border-gray-200'
+                    } ${(loading || subscriptionLoading) ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
                     {loading ? 'Loading...' : isCurrentPlan ? 'Current Plan' : plan.buttonText}
                   </button>
+                  
+                  {showCancelButton && (
+                    <button
+                      onClick={handleCancelSubscription}
+                      disabled={loading || subscriptionLoading}
+                      className="mt-2 block w-full py-2.5 sm:py-3 px-4 sm:px-6 border border-red-300 rounded-md text-center font-medium text-red-600 hover:bg-red-50"
+                    >
+                      {loading ? 'Loading...' : 'Cancel Subscription'}
+                    </button>
+                  )}
                 </div>
                 <div className="px-4 sm:px-6 pt-4 sm:pt-6 pb-6 sm:pb-8">
                   <h3 className="text-xs font-semibold text-gray-900 tracking-wide uppercase">

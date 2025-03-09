@@ -252,7 +252,9 @@ export async function POST(req: Request) {
       case 'customer.subscription.updated': {
         const subscription = event.data.object as Stripe.Subscription;
         const previousAttributes = event.data.previous_attributes as Partial<Stripe.Subscription>;
-        
+        const cancellation=event.data.object.canceled_at;
+        const cancel_at_period_end=event.data.object.cancel_at_period_end;
+        const cancellation_reason=event.data.object.cancellation_details?.reason;
         console.log('🔄 Subscription Update Event:', JSON.stringify({
           subscription_id: subscription.id,
           customer: subscription.customer,
@@ -282,11 +284,15 @@ export async function POST(req: Request) {
         const isStatusChange = previousAttributes.status !== undefined;
         const isRenewal = previousAttributes.current_period_start !== undefined;
         const isNewSubscription = isStatusChange && !isRenewal; // No previous status means new subscription
+        const isCancellation=cancel_at_period_end;
 
         console.log('🔍 Event Analysis:', JSON.stringify({
           isStatusChange,
           isRenewal,
           isNewSubscription,
+          isCancellation,
+          cancellation_reason,
+          cancellation,
           previousStatus: previousAttributes.status,
           previousPeriodStart: previousAttributes.current_period_start ? 
             new Date(previousAttributes.current_period_start * 1000).toISOString() : null
@@ -300,6 +306,55 @@ export async function POST(req: Request) {
           );
           console.log(`✅ Processed subscription ${isNewSubscription ? 'purchase' : 'renewal'} for user ${userData.clerk_user_id}`);
         }
+        if (isCancellation) 
+          {
+        console.log('❌ Subscription Deleted:', JSON.stringify({
+          subscription_id: subscription.id,
+          customer: subscription.customer,
+          status: subscription.status,
+          canceled_at: subscription.canceled_at ? 
+            new Date(subscription.canceled_at * 1000).toISOString() : null
+        }, null, 2));
+        
+        // Get the user associated with this customer
+        const { data: userData, error: userError } = await supabase
+          .from('user_points')
+          .select('clerk_user_id')
+          .eq('stripe_customer_id', subscription.customer)
+          .single();
+
+        if (userError) {
+          console.error('Error finding user for subscription:', userError);
+          throw userError;
+        }
+
+        // Update subscription status in Supabase
+        const { error: updateError } = await supabase
+          .from('user_points')
+          .update({ 
+            subscription_status: 'canceled',
+            subscription_updated_at: new Date().toISOString(),
+            stripe_subscription_id: null
+          })
+          .eq('clerk_user_id', userData.clerk_user_id);
+
+        if (updateError) {
+          console.error('Error updating subscription status:', updateError);
+          throw updateError;
+        }
+        const metadata = (await (await clerkClient()).users.getUser(userData.clerk_user_id)).publicMetadata;
+
+        // Clear subscription metadata from Clerk
+        await (await clerkClient()).users.updateUser(userData.clerk_user_id, {
+          publicMetadata: {
+          ...metadata,
+          cancel_at_period_end:true
+          }
+        });
+
+        console.log(`✅ Processed subscription cancellation for user ${userData.clerk_user_id}`);
+        }
+          
         break;
       }
 
@@ -339,17 +394,12 @@ export async function POST(req: Request) {
           console.error('Error updating subscription status:', updateError);
           throw updateError;
         }
-
+        const metadata = (await (await clerkClient()).users.getUser(userData.clerk_user_id)).publicMetadata;
         // Clear subscription metadata from Clerk
-        await (await clerkClient()).users.updateUserMetadata(userData.clerk_user_id, {
+        await (await clerkClient()).users.updateUser(userData.clerk_user_id, {
           publicMetadata: {
-            subscription_type: null,
-            subscription_start: null,
-            subscription_end: null,
-            next_points_credit: null,
-            points_per_credit: null,
-            stripe_subscription_id: null,
-            stripe_customer_id: null
+            ...metadata,
+            cancel_at_period_end:true
           }
         });
 

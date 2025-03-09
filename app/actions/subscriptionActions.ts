@@ -5,6 +5,7 @@ import { supabaseAdmin } from '@/utils/supabaseAdmin';
 import { auth } from '@clerk/nextjs/server';
 import { currentUser } from '@clerk/nextjs/server';
 import { clerkClient } from '@clerk/nextjs/server';
+
 /**
  * Process yearly subscription credit for a user
  * @param userId The Clerk user ID
@@ -23,7 +24,7 @@ export async function processYearlyCredit(userID: string, pointsPerCredit: numbe
     if (error) throw error;
     
     // Calculate new points total
-    const newPoints = (data?.points_remaining || 0) + pointsPerCredit;
+    const newPoints = (data?.points_remaining || 0) + Number(pointsPerCredit);
     
     // Update points in Supabase
     const { error: updateError } = await supabase
@@ -36,22 +37,38 @@ export async function processYearlyCredit(userID: string, pointsPerCredit: numbe
     if (updateError) throw updateError;
     
     // Get user from Clerk to update metadata
-     const client= await clerkClient();
+    const client = await clerkClient();
+    const user = await client.users.getUser(userID);
 
-    
     // Calculate next credit date (1 month from now)
     const nextMonth = new Date();
     nextMonth.setMonth(nextMonth.getMonth() + 1);
-    const update = await client.users.updateUser(userID, {
-      publicMetadata: {
-        next_points_credit: nextMonth.toISOString()
+    
+    // Only update next_points_credit if it will be less than subscription_end
+    const subscriptionEnd = user.publicMetadata.subscription_end as string | undefined;
+    
+    if (subscriptionEnd) {
+      const endDate = new Date(subscriptionEnd);
+      
+      // Only update if next credit date is before subscription end
+      if (nextMonth < endDate) {
+        // Update next_points_credit in Clerk while preserving all other metadata
+        const update = await client.users.updateUser(userID, {
+          publicMetadata: {
+            ...user.publicMetadata,
+            next_points_credit: nextMonth.toISOString()
+          }
+        });
+      } else {
+        const update = await client.users.updateUser(userID, {
+          publicMetadata: {
+            ...user.publicMetadata,
+            next_points_credit: null
+          }
+        });
+        console.log('Next credit date would be after subscription end, not updating');
       }
-    })
-    // Update next_points_credit in Clerk metadata via Supabase
-    // Since we can't directly update Clerk metadata from server actions,
-    // we'll use Supabase to store the next credit date
-
-  
+    }
     
     return { 
       success: true, 
@@ -115,6 +132,72 @@ export async function checkSubscriptionStatus() {
       subscriptionEnd: null,
       nextPointsCredit: null,
       error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+}
+
+/**
+ * Cancel a user's subscription in Stripe and update Clerk metadata
+ * @returns Object containing success status and message
+ */
+export async function cancelSubscription() {
+  try {
+    // Get the current user
+    const user = await currentUser();
+    
+    if (!user) {
+      return {
+        success: false,
+        message: 'User not authenticated'
+      };
+    }
+    
+    // Get the subscription ID from user metadata
+    const stripeSubscriptionId = user.publicMetadata.stripe_subscription_id as string | undefined;
+    
+    if (!stripeSubscriptionId) {
+      return {
+        success: false,
+        message: 'No active subscription found'
+      };
+    }
+    
+    // Get Stripe API key from environment variable
+    const stripeSecretKey = process.env.STRIPE_SECRET_KEY;
+    
+    if (!stripeSecretKey) {
+      throw new Error('Stripe secret key not found in environment variables');
+    }
+    
+    // Initialize Stripe
+    const stripe = require('stripe')(stripeSecretKey);
+    
+    // Cancel the subscription in Stripe
+    // This will cancel at period end, not immediately
+    await stripe.subscriptions.update(stripeSubscriptionId, {
+      cancel_at_period_end: true
+    });
+    
+    // Get the Clerk client
+    const clerk = await clerkClient();
+    
+    // Update user metadata to reflect cancellation status
+    await clerk.users.updateUser(user.id, {
+      publicMetadata: {
+        ...user.publicMetadata,
+        subscription_cancel_pending: true
+      }
+    });
+    
+    return {
+      success: true,
+      message: 'Subscription cancelled successfully. You will have access until the end of your billing period.'
+    };
+  } catch (error) {
+    console.error('Error cancelling subscription:', error);
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Unknown error occurred'
     };
   }
 }

@@ -8,6 +8,7 @@ import { Toaster } from 'sonner';
 import { ClerkProvider } from '@clerk/nextjs';
 import HeaderWrapper from './components/HeaderWrapper';
 import Providers from './providers';
+import SubscriptionCreditor from './components/SubscriptionCreditor';
 
 const montserrat = Montserrat({ 
   subsets: ['latin'],
@@ -46,6 +47,7 @@ export default function RootLayout({
           <HeaderWrapper />
           <main className="flex-grow pt-24">
             <Providers>
+              <SubscriptionCreditor />
               {children}
             </Providers>
           </main>
