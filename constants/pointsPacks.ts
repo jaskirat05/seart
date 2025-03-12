@@ -8,25 +8,25 @@ export interface PointsPack {
 export const pointsPacks: PointsPack[] = [
   {
     id: 'starter',
-    points: 10000,
-    price: 0.50,
+    points: 5000,
+    price: 10.00,
   },
   {
     id: 'popular',
-    points: 50000,
-    price: 0.50,
+    points: 10000,
+    price: 18.00,
     savings: 'Save 10%',
   },
   {
     id: 'pro',
-    points: 95000,
-    price: 0.5,
+    points: 20000,
+    price: 30.00,
     savings: 'Save 25%',
   },
   {
-    id: 'enterprise',
-    points: 300000,
-    price: 0.5,
+    id: 'Extra',
+    points: 40000,
+    price: 40.00,
     savings: 'Save 50%',
   },
 ];

@@ -122,7 +122,7 @@ const PricingPage = () => {
         ],
         buttonText: 'Upgrade to Pro',
         isPopular: true,
-        priceId: 'price_1R0gyeHFjWk1ZO4qp2ogzOFk'
+        priceId: 'price_1QzzdTHFjWk1ZO4qdALHb9Ie'
       }
     ],
     yearly: [
